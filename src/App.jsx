@@ -1,410 +1,403 @@
 /**
  * ═══════════════════════════════════════════════════════════════
- *  KARTA O'YINI - FULL PRODUCTION FRONTEND
- *  To'rt Bura & 108 - Real Multiplayer Card Game
- *  React + Vite + Socket.IO + Framer Motion
- *  HAMMASI BITTA App.jsx DA
+ *  KARTA O'YINI — ULTRA PREMIUM FRONTEND
+ *  To'rt Bura (Kozel) + 108 — Real Multiplayer
+ *  React + Socket.IO + Framer Motion
  * ═══════════════════════════════════════════════════════════════
  */
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { io } from "socket.io-client";
-import { motion, AnimatePresence, useAnimation } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
-// ─── CONFIG ─────────────────────────────────────────────────────
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3001";
 
-// ─── GLOBAL STYLES (injected into <head>) ───────────────────────
-const GLOBAL_CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+// ─── GLOBAL STYLES ───────────────────────────────────────────────
+const CSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@400;500;600;700&display=swap');
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg-deep:    #030510;
-    --bg-mid:     #070d20;
-    --bg-card:    #0a1228;
-    --neon-cyan:  #00f5ff;
-    --neon-gold:  #ffd700;
-    --neon-pink:  #ff006e;
-    --neon-green: #00ff88;
-    --neon-purple:#b800ff;
-    --glass-bg:   rgba(10, 18, 40, 0.7);
-    --glass-border: rgba(0, 245, 255, 0.15);
-    --text-primary: #e8f4ff;
-    --text-dim:   #5a7a9a;
-    --red-suit:   #ff3355;
-    --black-suit: #c8d8f0;
-    --font-display: 'Cinzel Decorative', serif;
-    --font-ui:    'Orbitron', monospace;
-    --font-body:  'Rajdhani', sans-serif;
+    --deep:      #020408;
+    --mid:       #060c16;
+    --surface:   #0b1425;
+    --surface2:  #0f1e38;
+    --gold:      #f5c842;
+    --gold2:     #ffaa00;
+    --cyan:      #00e5ff;
+    --pink:      #ff2d6e;
+    --green:     #00ff94;
+    --purple:    #a855f7;
+    --red:       #ff3b5c;
+    --blue:      #4488ff;
+    --text:      #dde8ff;
+    --dim:       #4a6080;
+    --dimmer:    #2a3a50;
+    --card-w:    #f0f5ff;
+    --font-d:    'Cinzel Decorative', serif;
+    --font-ui:   'Orbitron', monospace;
+    --font-b:    'Rajdhani', sans-serif;
   }
 
   html, body, #root {
-    width: 100%; height: 100%;
-    background: var(--bg-deep);
-    color: var(--text-primary);
-    font-family: var(--font-body);
+    width:100%; height:100%;
+    background: var(--deep);
+    color: var(--text);
+    font-family: var(--font-b);
     overflow: hidden;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
   }
 
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: var(--bg-deep); }
-  ::-webkit-scrollbar-thumb { background: var(--neon-cyan); border-radius: 2px; }
+  ::-webkit-scrollbar { width: 3px; }
+  ::-webkit-scrollbar-track { background: var(--deep); }
+  ::-webkit-scrollbar-thumb { background: var(--cyan); border-radius: 2px; }
 
-  input, button { font-family: var(--font-body); }
+  input, button { font-family: var(--font-b); }
 
-  .neon-text {
-    text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 40px currentColor;
+  @keyframes bg-shift {
+    0%,100% { background-position: 0% 50%; }
+    50%      { background-position: 100% 50%; }
+  }
+  @keyframes float-y {
+    0%,100% { transform: translateY(0); }
+    50%      { transform: translateY(-10px); }
+  }
+  @keyframes glow-pulse {
+    0%,100% { opacity:.6; }
+    50%      { opacity:1; }
+  }
+  @keyframes spin-slow {
+    to { transform: rotate(360deg); }
+  }
+  @keyframes deal-in {
+    from { transform: translateY(-60px) rotate(-8deg) scale(0.85); opacity:0; }
+    to   { transform: translateY(0) rotate(0deg) scale(1); opacity:1; }
+  }
+  @keyframes particle-rise {
+    0%   { transform:translateY(0) scale(1); opacity:.8; }
+    100% { transform:translateY(-120px) scale(0); opacity:0; }
+  }
+  @keyframes scan {
+    0%   { transform:translateY(-100%); }
+    100% { transform:translateY(110vh); }
+  }
+  @keyframes shimmer {
+    0%   { left:-100%; }
+    100% { left:200%; }
+  }
+  @keyframes bounce-in {
+    0%   { transform:scale(0.3); opacity:0; }
+    50%  { transform:scale(1.1); }
+    100% { transform:scale(1); opacity:1; }
+  }
+  @keyframes shake {
+    0%,100% { transform:translateX(0); }
+    25%      { transform:translateX(-6px); }
+    75%      { transform:translateX(6px); }
+  }
+  @keyframes winner-flash {
+    0%,100% { box-shadow:0 0 20px var(--gold); }
+    50%      { box-shadow:0 0 60px var(--gold), 0 0 100px var(--gold2); }
   }
 
   .glass {
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
+    background: rgba(11,20,37,0.75);
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(0,229,255,0.12);
   }
-
-  @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50%       { transform: translateY(-12px); }
+  .glass2 {
+    background: rgba(15,30,56,0.8);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.07);
   }
-  @keyframes pulse-glow {
-    0%, 100% { box-shadow: 0 0 10px var(--neon-cyan); }
-    50%       { box-shadow: 0 0 30px var(--neon-cyan), 0 0 60px var(--neon-cyan); }
-  }
-  @keyframes particle-float {
-    0%   { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-    10%  { opacity: 1; }
-    90%  { opacity: 1; }
-    100% { transform: translateY(-20px) rotate(720deg); opacity: 0; }
-  }
-  @keyframes scan-line {
-    0%   { transform: translateY(-100%); }
-    100% { transform: translateY(100vh); }
-  }
-  @keyframes shimmer {
-    0%   { background-position: -200% center; }
-    100% { background-position: 200% center; }
-  }
-  @keyframes card-deal {
-    0%   { transform: translateY(-100vh) rotate(-15deg); opacity: 0; }
-    100% { transform: translateY(0) rotate(0deg); opacity: 1; }
-  }
-  @keyframes trump-glow {
-    0%, 100% { box-shadow: 0 0 15px var(--neon-gold), 0 0 30px var(--neon-gold); }
-    50%       { box-shadow: 0 0 30px var(--neon-gold), 0 0 60px var(--neon-gold), 0 0 90px var(--neon-gold); }
+  .neon { text-shadow: 0 0 10px currentColor, 0 0 30px currentColor; }
+  .shimmer-line {
+    position:absolute; top:0; width:30%; height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);
+    animation: shimmer 3s infinite;
+    pointer-events:none;
   }
 `;
 
-// Inject styles
 if (typeof document !== 'undefined') {
-  const style = document.createElement('style');
-  style.textContent = GLOBAL_CSS;
-  document.head.appendChild(style);
+  const s = document.createElement('style');
+  s.textContent = CSS;
+  document.head.appendChild(s);
 }
 
 // ─── SOCKET SINGLETON ────────────────────────────────────────────
-let socketInstance = null;
+let _socket = null;
 function getSocket() {
-  if (!socketInstance) {
-    socketInstance = io(SERVER_URL, {
-      autoConnect: false,
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-    });
+  if (!_socket) {
+    _socket = io(SERVER_URL, { autoConnect: false, reconnection: true, reconnectionAttempts: 8, reconnectionDelay: 1000 });
   }
-  return socketInstance;
+  return _socket;
 }
 
-// ─── SUIT SYMBOLS & COLORS ───────────────────────────────────────
-const SUIT_SYMBOL = { spades: '♠', hearts: '♥', diamonds: '♦', clubs: '♣' };
-const SUIT_COLOR  = { spades: 'var(--black-suit)', hearts: 'var(--red-suit)', diamonds: 'var(--red-suit)', clubs: 'var(--black-suit)' };
-const SUIT_LABEL  = { spades: 'Pik', hearts: 'Qo\'r', diamonds: 'Karo', clubs: 'Treff' };
+// ─── CONSTANTS ───────────────────────────────────────────────────
+const SUIT_SYM   = { spades:'♠', hearts:'♥', diamonds:'♦', clubs:'♣' };
+const SUIT_CLR   = { spades:'#b8cce8', hearts:'#ff3b5c', diamonds:'#ff3b5c', clubs:'#b8cce8' };
+const SUIT_LBL   = { spades:'Pik', hearts:'Qoʻr', diamonds:'Karo', clubs:'Treff' };
+const BURA_PTS   = { A:11, '10':10, K:4, Q:3, J:2, 9:0, 8:0, 7:0, 6:0 };
+const RANK_ORDER = ['6','7','8','9','J','Q','K','10','A'];
 
-// ─── SOUND ENGINE ────────────────────────────────────────────────
-const AudioCtx = typeof window !== 'undefined' ? new (window.AudioContext || window.webkitAudioContext)() : null;
-
-function playTone(freq, duration, type = 'sine', vol = 0.3) {
-  if (!AudioCtx) return;
+// ─── AUDIO ENGINE ────────────────────────────────────────────────
+const AC = typeof window !== 'undefined' ? new (window.AudioContext || window.webkitAudioContext)() : null;
+function tone(f, d, t='sine', v=0.25) {
+  if (!AC) return;
   try {
-    const osc = AudioCtx.createOscillator();
-    const gain = AudioCtx.createGain();
-    osc.connect(gain); gain.connect(AudioCtx.destination);
-    osc.frequency.value = freq;
-    osc.type = type;
-    gain.gain.setValueAtTime(vol, AudioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, AudioCtx.currentTime + duration);
-    osc.start(); osc.stop(AudioCtx.currentTime + duration);
-  } catch (e) {}
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.connect(g); g.connect(AC.destination);
+    o.frequency.value = f; o.type = t;
+    g.gain.setValueAtTime(v, AC.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + d);
+    o.start(); o.stop(AC.currentTime + d);
+  } catch(e) {}
 }
-
 const SFX = {
-  cardPlay:  () => { playTone(440, 0.1, 'triangle', 0.2); setTimeout(() => playTone(330, 0.1, 'triangle', 0.15), 60); },
-  cardDraw:  () => playTone(300, 0.15, 'sawtooth', 0.15),
-  win:       () => { [523,659,784,1047].forEach((f,i) => setTimeout(() => playTone(f, 0.3, 'sine', 0.25), i*120)); },
-  join:      () => playTone(660, 0.2, 'sine', 0.2),
-  error:     () => { playTone(200, 0.3, 'sawtooth', 0.3); },
-  tick:      () => playTone(880, 0.05, 'square', 0.1),
-  shuffle:   () => { for(let i=0;i<8;i++) setTimeout(()=>playTone(200+Math.random()*400,0.08,'sawtooth',0.1),i*40); },
+  deal:    () => { for(let i=0;i<4;i++) setTimeout(()=>tone(280+i*40,.08,'triangle',.18),i*70); },
+  play:    () => { tone(440,.08,'triangle',.2); setTimeout(()=>tone(550,.08,'triangle',.15),50); },
+  draw:    () => tone(300,.15,'sawtooth',.15),
+  win:     () => { [523,659,784,1047,1319].forEach((f,i)=>setTimeout(()=>tone(f,.35,'sine',.25),i*100)); },
+  error:   () => { tone(180,.3,'sawtooth',.3); },
+  join:    () => tone(660,.2,'sine',.2),
+  throw_:  () => { tone(220,.2,'sawtooth',.2); },
+  tick:    () => tone(880,.04,'square',.12),
+  reveal:  () => { tone(700,.12,'sine',.2); setTimeout(()=>tone(900,.12,'sine',.18),80); },
 };
 
-// ─── PARTICLES BACKGROUND ────────────────────────────────────────
-function ParticlesBG() {
-  const particles = useMemo(() =>
-    Array.from({ length: 25 }, (_, i) => ({
-      id: i,
-      left: Math.random() * 100,
-      size: Math.random() * 6 + 2,
-      duration: Math.random() * 15 + 10,
-      delay: Math.random() * 15,
-      color: ['var(--neon-cyan)', 'var(--neon-gold)', 'var(--neon-pink)', 'var(--neon-purple)'][Math.floor(Math.random() * 4)],
-      shape: Math.random() > 0.5 ? '50%' : '2px',
-    })), []);
+// ─── BACKGROUND ──────────────────────────────────────────────────
+function BG({ variant = 'default' }) {
+  const orbs = useMemo(() => Array.from({length: 6}, (_,i) => ({
+    id: i,
+    x: Math.random()*100, y: Math.random()*100,
+    size: 200 + Math.random()*300,
+    color: ['rgba(0,229,255,0.04)','rgba(168,85,247,0.05)','rgba(245,200,66,0.04)','rgba(255,45,110,0.04)'][i%4],
+    dur: 8 + Math.random()*10,
+    delay: Math.random()*5,
+  })), []);
 
   return (
-    <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
-      {/* Animated gradient orbs */}
+    <div style={{ position:'fixed', inset:0, pointerEvents:'none', zIndex:0, overflow:'hidden' }}>
+      {/* Base gradient */}
       <div style={{
-        position: 'absolute', width: '60vw', height: '60vw',
-        borderRadius: '50%', top: '-20vw', left: '-20vw',
-        background: 'radial-gradient(circle, rgba(0,245,255,0.06) 0%, transparent 70%)',
-        animation: 'float 8s ease-in-out infinite',
+        position:'absolute', inset:0,
+        background: variant === 'game'
+          ? 'radial-gradient(ellipse at 30% 20%, #041a10 0%, #020408 60%)'
+          : 'radial-gradient(ellipse at 20% 10%, #050d1a 0%, #020408 60%)',
       }} />
-      <div style={{
-        position: 'absolute', width: '50vw', height: '50vw',
-        borderRadius: '50%', bottom: '-15vw', right: '-15vw',
-        background: 'radial-gradient(circle, rgba(184,0,255,0.08) 0%, transparent 70%)',
-        animation: 'float 12s ease-in-out infinite reverse',
-      }} />
-      <div style={{
-        position: 'absolute', width: '40vw', height: '40vw',
-        borderRadius: '50%', top: '30%', left: '30%',
-        background: 'radial-gradient(circle, rgba(255,215,0,0.04) 0%, transparent 70%)',
-        animation: 'float 10s ease-in-out infinite 3s',
-      }} />
-      {/* Scan line */}
-      <div style={{
-        position: 'absolute', width: '100%', height: '2px',
-        background: 'linear-gradient(90deg, transparent, rgba(0,245,255,0.3), transparent)',
-        animation: 'scan-line 8s linear infinite',
-        pointerEvents: 'none',
-      }} />
-      {/* Floating particles */}
-      {particles.map(p => (
-        <div key={p.id} style={{
-          position: 'absolute', bottom: '-10px',
-          left: `${p.left}%`,
-          width: p.size, height: p.size,
-          borderRadius: p.shape,
-          background: p.color,
-          boxShadow: `0 0 ${p.size * 2}px ${p.color}`,
-          animation: `particle-float ${p.duration}s linear ${p.delay}s infinite`,
+      {/* Orbs */}
+      {orbs.map(o => (
+        <div key={o.id} style={{
+          position:'absolute',
+          left:`${o.x}%`, top:`${o.y}%`,
+          width:o.size, height:o.size,
+          borderRadius:'50%',
+          background:`radial-gradient(circle, ${o.color} 0%, transparent 70%)`,
+          transform:'translate(-50%,-50%)',
+          animation:`float-y ${o.dur}s ease-in-out ${o.delay}s infinite`,
         }} />
       ))}
-      {/* Grid lines */}
-      <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.03 }}>
+      {/* Scanline */}
+      <div style={{
+        position:'absolute', width:'100%', height:'2px',
+        background:'linear-gradient(90deg,transparent,rgba(0,229,255,0.2),transparent)',
+        animation:'scan 10s linear infinite',
+      }} />
+      {/* Grid */}
+      <svg style={{ position:'absolute', inset:0, width:'100%', height:'100%', opacity:.03 }}>
         <defs>
-          <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
-            <path d="M 60 0 L 0 0 0 60" fill="none" stroke="var(--neon-cyan)" strokeWidth="0.5"/>
+          <pattern id="g" width="50" height="50" patternUnits="userSpaceOnUse">
+            <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#00e5ff" strokeWidth=".5"/>
           </pattern>
         </defs>
-        <rect width="100%" height="100%" fill="url(#grid)" />
+        <rect width="100%" height="100%" fill="url(#g)"/>
       </svg>
     </div>
   );
 }
 
 // ─── CARD COMPONENT ──────────────────────────────────────────────
-function CardUI({ card, onClick, selected, playable, faceDown, small, trump, animDelay = 0 }) {
-  const color = card ? SUIT_COLOR[card.suit] : 'white';
-  const symbol = card ? SUIT_SYMBOL[card.suit] : '';
-
-  const s = {
-    width: small ? 52 : 72,
-    height: small ? 76 : 104,
-    borderRadius: 8,
-    cursor: onClick && playable ? 'pointer' : 'default',
-    position: 'relative',
-    flexShrink: 0,
-    transition: 'transform 0.2s, box-shadow 0.2s',
-    animation: `card-deal 0.4s ease ${animDelay}s both`,
-  };
+function Card({ card, onClick, selected, playable, faceDown, small, trump, animDelay=0, shake: doShake=false }) {
+  const w = small ? 50 : 68;
+  const h = small ? 72 : 100;
+  const color = card ? SUIT_CLR[card.suit] : '#fff';
+  const sym   = card ? SUIT_SYM[card.suit] : '';
 
   if (faceDown) {
     return (
       <motion.div
+        whileHover={onClick ? { scale:1.05, y:-4 } : {}}
+        onClick={onClick}
         style={{
-          ...s,
-          background: 'linear-gradient(135deg, #0a1535 0%, #1a2a5e 50%, #0a1535 100%)',
-          border: '1px solid rgba(0,245,255,0.3)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
+          width:w, height:h, borderRadius:8, flexShrink:0,
+          background:'linear-gradient(135deg, #0a1a3a 0%, #152040 50%, #0a1220 100%)',
+          border:'1px solid rgba(0,229,255,0.25)',
+          boxShadow:'0 4px 16px rgba(0,0,0,0.6)',
+          display:'flex', alignItems:'center', justifyContent:'center',
+          cursor: onClick ? 'pointer' : 'default',
+          position:'relative', overflow:'hidden',
         }}
-        whileHover={onClick ? { scale: 1.05 } : {}}
       >
         <div style={{
-          width: '80%', height: '80%',
-          border: '1px solid rgba(0,245,255,0.2)',
-          borderRadius: 4,
-          backgroundImage: `repeating-linear-gradient(45deg, rgba(0,245,255,0.05) 0px, rgba(0,245,255,0.05) 2px, transparent 2px, transparent 8px)`,
-        }} />
+          width:'80%', height:'80%',
+          border:'1px solid rgba(0,229,255,0.15)', borderRadius:4,
+          backgroundImage:`repeating-linear-gradient(45deg,rgba(0,229,255,.04) 0,rgba(0,229,255,.04) 2px,transparent 2px,transparent 9px)`,
+        }}/>
+        <div className="shimmer-line"/>
       </motion.div>
     );
   }
 
   if (!card) return null;
 
+  const isPlayable = playable && !!onClick;
+
   return (
     <motion.div
-      onClick={() => onClick && playable && onClick(card)}
+      onClick={() => isPlayable && onClick(card)}
+      animate={doShake ? { x:[0,-6,6,-4,4,-2,2,0] } : {}}
+      transition={doShake ? { duration:.4 } : {}}
+      whileHover={isPlayable ? { scale:1.1, y: selected ? -22 : -10 } : selected ? {} : {}}
+      whileTap={isPlayable ? { scale:.93 } : {}}
       style={{
-        ...s,
+        width:w, height:h, borderRadius:8, flexShrink:0,
         background: selected
-          ? 'linear-gradient(135deg, #1a3a2a, #0d2a1a)'
-          : 'linear-gradient(135deg, #f8f9ff 0%, #e8eeff 100%)',
+          ? 'linear-gradient(145deg, #1a3a26, #0d2418)'
+          : 'linear-gradient(145deg, #f4f8ff 0%, #e4ecff 100%)',
         border: trump
-          ? '2px solid var(--neon-gold)'
+          ? '2px solid var(--gold)'
           : selected
-            ? '2px solid var(--neon-green)'
-            : playable
-              ? '2px solid rgba(0,245,255,0.6)'
-              : '1px solid rgba(0,0,0,0.2)',
+            ? '2.5px solid var(--green)'
+            : isPlayable
+              ? '2px solid rgba(0,229,255,0.7)'
+              : '1px solid rgba(180,200,240,0.25)',
         boxShadow: trump
-          ? '0 0 15px rgba(255,215,0,0.5), 0 4px 15px rgba(0,0,0,0.4)'
+          ? '0 0 14px rgba(245,200,66,0.6), 0 4px 14px rgba(0,0,0,0.5), animation:winner-flash 2s infinite'
           : selected
-            ? '0 0 20px rgba(0,255,136,0.5), 0 -8px 0 0 rgba(0,255,136,0.3)'
-            : playable
-              ? '0 0 10px rgba(0,245,255,0.3), 0 4px 15px rgba(0,0,0,0.3)'
-              : '0 4px 10px rgba(0,0,0,0.3)',
+            ? '0 0 20px rgba(0,255,148,0.6), 0 -10px 0 0 rgba(0,255,148,0.25)'
+            : isPlayable
+              ? '0 0 12px rgba(0,229,255,0.4), 0 4px 16px rgba(0,0,0,0.4)'
+              : '0 3px 10px rgba(0,0,0,0.4)',
         transform: selected ? 'translateY(-16px)' : undefined,
-        display: 'flex', flexDirection: 'column',
-        justifyContent: 'space-between',
+        display:'flex', flexDirection:'column', justifyContent:'space-between',
         padding: small ? '4px 5px' : '6px 8px',
-        animation: `card-deal 0.35s cubic-bezier(0.34,1.56,0.64,1) ${animDelay}s both`,
+        cursor: isPlayable ? 'pointer' : 'default',
+        position:'relative', overflow:'hidden',
+        animation:`deal-in .35s cubic-bezier(0.34,1.4,0.64,1) ${animDelay}s both`,
+        transition:'box-shadow .2s, border .2s',
       }}
-      whileHover={playable && onClick ? { scale: 1.08, y: selected ? -20 : -8 } : {}}
-      whileTap={playable && onClick ? { scale: 0.95 } : {}}
     >
-      {/* Top-left */}
-      <div style={{ color, lineHeight: 1 }}>
-        <div style={{ fontSize: small ? 11 : 14, fontWeight: 900, fontFamily: 'var(--font-ui)' }}>{card.rank}</div>
-        <div style={{ fontSize: small ? 10 : 13 }}>{symbol}</div>
+      <div style={{ color, lineHeight:1 }}>
+        <div style={{ fontSize:small?11:14, fontWeight:900, fontFamily:'var(--font-ui)', letterSpacing:'-0.02em' }}>{card.rank}</div>
+        <div style={{ fontSize:small?10:13 }}>{sym}</div>
       </div>
-      {/* Center */}
-      <div style={{
-        textAlign: 'center', color, fontSize: small ? 20 : 30,
-        textShadow: `0 0 8px ${color}40`,
-      }}>{symbol}</div>
-      {/* Bottom-right (flipped) */}
-      <div style={{ color, lineHeight: 1, transform: 'rotate(180deg)', alignSelf: 'flex-end' }}>
-        <div style={{ fontSize: small ? 11 : 14, fontWeight: 900, fontFamily: 'var(--font-ui)' }}>{card.rank}</div>
-        <div style={{ fontSize: small ? 10 : 13 }}>{symbol}</div>
+      <div style={{ textAlign:'center', color, fontSize:small?18:28, textShadow:`0 0 6px ${color}50`, lineHeight:1 }}>{sym}</div>
+      <div style={{ color, lineHeight:1, transform:'rotate(180deg)', alignSelf:'flex-end' }}>
+        <div style={{ fontSize:small?11:14, fontWeight:900, fontFamily:'var(--font-ui)', letterSpacing:'-0.02em' }}>{card.rank}</div>
+        <div style={{ fontSize:small?10:13 }}>{sym}</div>
       </div>
       {trump && (
         <div style={{
-          position: 'absolute', top: -8, right: -8,
-          background: 'var(--neon-gold)', borderRadius: '50%',
-          width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 10, color: '#000', fontWeight: 900, boxShadow: '0 0 10px var(--neon-gold)',
+          position:'absolute', top:-7, right:-7,
+          width:16, height:16, borderRadius:'50%',
+          background:'var(--gold)', display:'flex', alignItems:'center', justifyContent:'center',
+          fontSize:9, color:'#000', fontWeight:900,
+          boxShadow:'0 0 8px var(--gold)',
         }}>★</div>
+      )}
+      {isPlayable && !selected && (
+        <div style={{
+          position:'absolute', bottom:0, left:0, right:0, height:3,
+          background:'linear-gradient(90deg,transparent,var(--cyan),transparent)',
+          borderRadius:'0 0 8px 8px',
+        }}/>
       )}
     </motion.div>
   );
 }
 
-// ─── NEON BUTTON ─────────────────────────────────────────────────
-function NeonBtn({ children, onClick, color = 'cyan', disabled, small, danger, style: extraStyle }) {
-  const colors = {
-    cyan:   { base: 'var(--neon-cyan)',  bg: 'rgba(0,245,255,0.08)' },
-    gold:   { base: 'var(--neon-gold)',  bg: 'rgba(255,215,0,0.08)' },
-    pink:   { base: 'var(--neon-pink)',  bg: 'rgba(255,0,110,0.08)' },
-    green:  { base: 'var(--neon-green)', bg: 'rgba(0,255,136,0.08)' },
-    purple: { base: 'var(--neon-purple)',bg: 'rgba(184,0,255,0.08)' },
+// ─── UI COMPONENTS ────────────────────────────────────────────────
+function Btn({ children, onClick, color='cyan', disabled, small, full, style:sx }) {
+  const map = {
+    cyan:   { c:'var(--cyan)',   bg:'rgba(0,229,255,0.08)',  b:'rgba(0,229,255,0.5)' },
+    gold:   { c:'var(--gold)',   bg:'rgba(245,200,66,0.08)', b:'rgba(245,200,66,0.5)' },
+    pink:   { c:'var(--pink)',   bg:'rgba(255,45,110,0.08)', b:'rgba(255,45,110,0.5)' },
+    green:  { c:'var(--green)',  bg:'rgba(0,255,148,0.08)',  b:'rgba(0,255,148,0.5)' },
+    purple: { c:'var(--purple)', bg:'rgba(168,85,247,0.08)', b:'rgba(168,85,247,0.5)' },
+    red:    { c:'var(--red)',    bg:'rgba(255,59,92,0.08)',  b:'rgba(255,59,92,0.5)' },
   };
-  const c = danger ? colors.pink : colors[color] || colors.cyan;
-
+  const clr = map[color] || map.cyan;
   return (
     <motion.button
       onClick={!disabled ? onClick : undefined}
-      whileHover={!disabled ? { scale: 1.04 } : {}}
-      whileTap={!disabled ? { scale: 0.96 } : {}}
+      whileHover={!disabled ? { scale:1.03 } : {}}
+      whileTap={!disabled ? { scale:.96 } : {}}
       style={{
-        background: disabled ? 'rgba(255,255,255,0.05)' : c.bg,
-        border: `1px solid ${disabled ? 'rgba(255,255,255,0.1)' : c.base}`,
-        color: disabled ? 'rgba(255,255,255,0.3)' : c.base,
-        padding: small ? '8px 16px' : '12px 28px',
+        background: disabled ? 'rgba(255,255,255,.04)' : clr.bg,
+        border: `1px solid ${disabled ? 'rgba(255,255,255,.08)' : clr.b}`,
+        color: disabled ? 'rgba(255,255,255,.25)' : clr.c,
+        padding: small ? '7px 14px' : '11px 22px',
         borderRadius: 8,
-        fontFamily: 'var(--font-ui)',
-        fontSize: small ? 11 : 13,
-        fontWeight: 700,
-        letterSpacing: '0.08em',
+        fontFamily:'var(--font-ui)', fontSize: small ? 10 : 12, fontWeight:700,
+        letterSpacing:'0.08em', textTransform:'uppercase',
         cursor: disabled ? 'not-allowed' : 'pointer',
-        textTransform: 'uppercase',
-        boxShadow: disabled ? 'none' : `0 0 15px ${c.base}40, inset 0 0 15px ${c.base}10`,
-        transition: 'all 0.2s',
-        ...extraStyle,
+        boxShadow: disabled ? 'none' : `0 0 12px ${clr.b}50, inset 0 0 12px ${clr.b}10`,
+        transition:'all .2s',
+        width: full ? '100%' : undefined,
+        position:'relative', overflow:'hidden',
+        ...sx,
       }}
     >
+      {!disabled && <div className="shimmer-line"/>}
       {children}
     </motion.button>
   );
 }
 
-// ─── NEON INPUT ──────────────────────────────────────────────────
-function NeonInput({ value, onChange, placeholder, onKeyDown, autoFocus, maxLength }) {
+function Input({ value, onChange, placeholder, onKeyDown, autoFocus, maxLength }) {
   return (
     <input
-      value={value}
-      onChange={e => onChange(e.target.value)}
-      onKeyDown={onKeyDown}
-      placeholder={placeholder}
-      autoFocus={autoFocus}
-      maxLength={maxLength || 20}
+      value={value} onChange={e => onChange(e.target.value)}
+      onKeyDown={onKeyDown} placeholder={placeholder}
+      autoFocus={autoFocus} maxLength={maxLength||20}
       style={{
-        background: 'rgba(0,245,255,0.05)',
-        border: '1px solid rgba(0,245,255,0.4)',
-        borderRadius: 8,
-        color: 'var(--neon-cyan)',
-        padding: '14px 20px',
-        fontSize: 18,
-        fontFamily: 'var(--font-ui)',
-        letterSpacing: '0.1em',
-        outline: 'none',
-        width: '100%',
-        boxShadow: '0 0 20px rgba(0,245,255,0.15), inset 0 0 10px rgba(0,245,255,0.05)',
-        transition: 'all 0.3s',
+        background:'rgba(0,229,255,0.05)',
+        border:'1px solid rgba(0,229,255,0.35)', borderRadius:8,
+        color:'var(--cyan)', padding:'13px 18px',
+        fontSize:17, fontFamily:'var(--font-ui)', letterSpacing:'.08em',
+        outline:'none', width:'100%',
+        boxShadow:'0 0 20px rgba(0,229,255,0.1), inset 0 0 10px rgba(0,229,255,0.04)',
+        transition:'all .3s',
       }}
       onFocus={e => {
-        e.target.style.borderColor = 'var(--neon-cyan)';
-        e.target.style.boxShadow = '0 0 30px rgba(0,245,255,0.3), inset 0 0 15px rgba(0,245,255,0.1)';
+        e.target.style.borderColor = 'var(--cyan)';
+        e.target.style.boxShadow = '0 0 30px rgba(0,229,255,0.25), inset 0 0 15px rgba(0,229,255,0.08)';
       }}
       onBlur={e => {
-        e.target.style.borderColor = 'rgba(0,245,255,0.4)';
-        e.target.style.boxShadow = '0 0 20px rgba(0,245,255,0.15), inset 0 0 10px rgba(0,245,255,0.05)';
+        e.target.style.borderColor = 'rgba(0,229,255,0.35)';
+        e.target.style.boxShadow = '0 0 20px rgba(0,229,255,0.1)';
       }}
     />
   );
 }
 
-// ─── TOAST NOTIFICATIONS ─────────────────────────────────────────
 function Toast({ toasts }) {
   return (
-    <div style={{ position: 'fixed', top: 20, right: 20, zIndex: 9999, display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <div style={{ position:'fixed', top:16, right:16, zIndex:9999, display:'flex', flexDirection:'column', gap:8, maxWidth:300 }}>
       <AnimatePresence>
         {toasts.map(t => (
           <motion.div key={t.id}
-            initial={{ x: 100, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 100, opacity: 0 }}
+            initial={{ x:80, opacity:0 }} animate={{ x:0, opacity:1 }} exit={{ x:80, opacity:0 }}
             style={{
-              padding: '12px 20px', borderRadius: 8, fontSize: 13,
-              fontFamily: 'var(--font-ui)', letterSpacing: '0.05em',
-              background: t.type === 'error' ? 'rgba(255,0,110,0.15)' : t.type === 'success' ? 'rgba(0,255,136,0.15)' : 'rgba(0,245,255,0.15)',
-              border: `1px solid ${t.type === 'error' ? 'var(--neon-pink)' : t.type === 'success' ? 'var(--neon-green)' : 'var(--neon-cyan)'}`,
-              color: t.type === 'error' ? 'var(--neon-pink)' : t.type === 'success' ? 'var(--neon-green)' : 'var(--neon-cyan)',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-              maxWidth: 280,
+              padding:'11px 18px', borderRadius:8, fontSize:12,
+              fontFamily:'var(--font-ui)', letterSpacing:'.05em',
+              background: t.type==='error' ? 'rgba(255,45,110,.15)' : t.type==='success' ? 'rgba(0,255,148,.12)' : 'rgba(0,229,255,.12)',
+              border:`1px solid ${t.type==='error'?'var(--pink)':t.type==='success'?'var(--green)':'var(--cyan)'}`,
+              color: t.type==='error' ? 'var(--pink)' : t.type==='success' ? 'var(--green)' : 'var(--cyan)',
+              boxShadow:'0 4px 20px rgba(0,0,0,.4)',
             }}
           >{t.msg}</motion.div>
         ))}
@@ -413,113 +406,75 @@ function Toast({ toasts }) {
   );
 }
 
-// ─── SCREEN: INTRO / LOGIN ────────────────────────────────────────
+// ─── SCREEN: LOGIN ────────────────────────────────────────────────
 function LoginScreen({ onLogin }) {
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
-  const [phase, setPhase] = useState('intro'); // intro | login
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('karta_nickname');
+    const saved = localStorage.getItem('karta_nick');
     if (saved) setName(saved);
-    setTimeout(() => setPhase('login'), 2200);
+    setTimeout(() => setReady(true), 1800);
   }, []);
 
-  function handleSubmit() {
-    const trimmed = name.trim();
-    if (trimmed.length < 2) return;
+  function submit() {
+    const n = name.trim();
+    if (n.length < 2) return;
     setLoading(true);
-    localStorage.setItem('karta_nickname', trimmed);
-    setTimeout(() => onLogin(trimmed), 500);
+    localStorage.setItem('karta_nick', n);
+    setTimeout(() => onLogin(n), 400);
   }
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-      flexDirection: 'column', zIndex: 100,
-    }}>
-      <ParticlesBG />
-
+    <div style={{ position:'fixed', inset:0, display:'flex', alignItems:'center', justifyContent:'center', zIndex:100 }}>
+      <BG/>
       <AnimatePresence mode="wait">
-        {phase === 'intro' ? (
+        {!ready ? (
           <motion.div key="intro"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.1 }}
-            transition={{ duration: 0.5 }}
-            style={{ textAlign: 'center', zIndex: 1 }}
+            initial={{ opacity:0, scale:.8 }} animate={{ opacity:1, scale:1 }} exit={{ opacity:0, scale:1.05 }}
+            style={{ textAlign:'center', zIndex:1 }}
           >
             <motion.div
-              animate={{ rotateY: [0, 360] }}
-              transition={{ duration: 1.5, ease: 'easeInOut' }}
-              style={{ fontSize: 90, marginBottom: 20 }}
+              animate={{ rotateY:[0,360] }}
+              transition={{ duration:1.4, ease:'easeInOut' }}
+              style={{ fontSize:88, marginBottom:20 }}
             >🎴</motion.div>
             <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              style={{
-                fontFamily: 'var(--font-display)', fontSize: 'clamp(28px, 6vw, 52px)',
-                color: 'var(--neon-gold)', textShadow: '0 0 20px var(--neon-gold), 0 0 40px var(--neon-gold)',
-                letterSpacing: '0.05em',
-              }}
+              initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:.3 }}
+              style={{ fontFamily:'var(--font-d)', fontSize:'clamp(26px,6vw,48px)', color:'var(--gold)', textShadow:'0 0 20px var(--gold)', letterSpacing:'.04em' }}
             >KARTA O'YINI</motion.h1>
             <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.8 }}
-              style={{ color: 'var(--neon-cyan)', fontFamily: 'var(--font-ui)', fontSize: 12, letterSpacing: '0.3em', marginTop: 8 }}
-            >TO'RT BURA • 108 • MULTIPLAYER</motion.p>
+              initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:.8 }}
+              style={{ color:'var(--cyan)', fontFamily:'var(--font-ui)', fontSize:10, letterSpacing:'.3em', marginTop:8 }}
+            >TO'RT BURA • 108 • ONLINE MULTIPLAYER</motion.p>
           </motion.div>
         ) : (
-          <motion.div key="login"
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            style={{ zIndex: 1, width: '100%', maxWidth: 440, padding: '0 24px' }}
+          <motion.div key="form"
+            initial={{ opacity:0, y:30 }} animate={{ opacity:1, y:0 }}
+            style={{ zIndex:1, width:'100%', maxWidth:420, padding:'0 20px' }}
           >
-            <div style={{
-              background: 'rgba(7,13,32,0.9)',
-              border: '1px solid rgba(0,245,255,0.2)',
-              borderRadius: 20,
-              padding: '48px 40px',
-              backdropFilter: 'blur(30px)',
-              boxShadow: '0 0 60px rgba(0,245,255,0.08), 0 40px 80px rgba(0,0,0,0.5)',
-            }}>
-              <div style={{ textAlign: 'center', marginBottom: 40 }}>
-                <div style={{ fontSize: 50, marginBottom: 12 }}>🎴</div>
-                <h1 style={{
-                  fontFamily: 'var(--font-display)', fontSize: 24,
-                  color: 'var(--neon-gold)',
-                  textShadow: '0 0 15px var(--neon-gold)',
-                }}>KARTA O'YINI</h1>
-                <p style={{ color: 'var(--text-dim)', fontSize: 13, marginTop: 6, fontFamily: 'var(--font-ui)', letterSpacing: '0.1em' }}>
+            <div className="glass" style={{ borderRadius:20, padding:'44px 36px', boxShadow:'0 0 60px rgba(0,229,255,0.07), 0 40px 80px rgba(0,0,0,0.5)' }}>
+              <div style={{ textAlign:'center', marginBottom:36 }}>
+                <motion.div
+                  animate={{ animation:'float-y 4s ease-in-out infinite' }}
+                  style={{ fontSize:52, marginBottom:14 }}
+                >🎴</motion.div>
+                <h1 style={{ fontFamily:'var(--font-d)', fontSize:22, color:'var(--gold)', textShadow:'0 0 12px var(--gold)' }}>
+                  KARTA O'YINI
+                </h1>
+                <p style={{ color:'var(--dim)', fontSize:11, marginTop:8, fontFamily:'var(--font-ui)', letterSpacing:'.15em' }}>
                   NICKNAME KIRITING
                 </p>
               </div>
-
-              <div style={{ marginBottom: 24 }}>
-                <NeonInput
-                  value={name}
-                  onChange={setName}
-                  placeholder="Ismingiz..."
-                  autoFocus
-                  maxLength={20}
-                  onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-                />
+              <div style={{ marginBottom:20 }}>
+                <Input value={name} onChange={setName} placeholder="Ismingiz..." autoFocus onKeyDown={e=>e.key==='Enter'&&submit()} />
               </div>
-
-              <NeonBtn
-                color="gold"
-                onClick={handleSubmit}
-                disabled={name.trim().length < 2 || loading}
-                style={{ width: '100%', fontSize: 14, padding: '16px' }}
-              >
-                {loading ? 'YUKLANMOQDA...' : 'O\'YINGA KIRISH →'}
-              </NeonBtn>
-
-              <p style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: 11, marginTop: 20, fontFamily: 'var(--font-ui)' }}>
-                ONLINE MULTIPLAYER • O'ZBEKISTON
+              <Btn color="gold" onClick={submit} disabled={name.trim().length<2||loading} full sx={{ padding:'15px', fontSize:13 }}>
+                {loading ? 'YUKLANMOQDA...' : "O'YINGA KIRISH →"}
+              </Btn>
+              <p style={{ textAlign:'center', color:'var(--dimmer)', fontSize:10, marginTop:18, fontFamily:'var(--font-ui)' }}>
+                O'ZBEKISTON • ONLINE KARTA O'YINI
               </p>
             </div>
           </motion.div>
@@ -530,111 +485,93 @@ function LoginScreen({ onLogin }) {
 }
 
 // ─── SCREEN: MAIN MENU ────────────────────────────────────────────
-function MainMenu({ nickname, onSelectGame, onLogout }) {
+function MenuScreen({ nickname, onSelect, onLogout }) {
   const games = [
     {
-      id: 'bura',
-      icon: '🃏',
-      title: "TO'RT BURA",
-      subtitle: '2 yoki 4 kishilik',
-      desc: 'Klassik O\'zbek karta o\'yini. Kozir urish. 61+ ball g\'alaba.',
-      color: 'var(--neon-gold)',
-      glow: 'rgba(255,215,0,0.15)',
+      id:'bura', icon:'🃏', title:"TO'RT BURA", sub:'2 yoki 4 kishilik',
+      desc:'Oʻzbek klassik kozel oʻyini. Kartalar bilan trick yutib, 61+ ball yigʻing. 12 jarima = yutqazding!',
+      rules:['Tuz=11, 10=10, Shoh=4, Dama=3, Valet=2', 'Kozir istalgan kartani uradi', 'Jarima: 61+=0, 32-60=2, 1-31=4, 0=6 shtraf'],
+      color:'var(--gold)', glow:'rgba(245,200,66,0.12)',
     },
     {
-      id: '108',
-      icon: '🔥',
-      title: '108',
-      subtitle: '2-6 kishilik',
-      desc: 'Tez o\'yin. Kartalardan qutuling. Maxsus kartalar bilan raqibga karta bering.',
-      color: 'var(--neon-pink)',
-      glow: 'rgba(255,0,110,0.15)',
+      id:'108', icon:'🔥', title:'108', sub:'2-6 kishilik',
+      desc:'Kartalardan qutuling! Maxsus kartalar bilan raqibga karta bering yoki uning navbatini o\'tkazib yuboring.',
+      rules:['6=+2 karta, 7=+1 karta, Ks=+5 karta', 'Dama=suit o\'zgartirish, 8=skip, Valet=burilish', 'Birinchi kartasiz qolgan g\'alaba!'],
+      color:'var(--pink)', glow:'rgba(255,45,110,0.12)',
     },
   ];
 
   return (
-    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', zIndex: 10 }}>
-      <ParticlesBG />
-
+    <div style={{ position:'fixed', inset:0, display:'flex', flexDirection:'column', zIndex:10 }}>
+      <BG/>
       {/* Header */}
       <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '20px 28px', zIndex: 1,
-        borderBottom: '1px solid rgba(0,245,255,0.08)',
-        background: 'rgba(3,5,16,0.8)', backdropFilter: 'blur(10px)',
+        display:'flex', alignItems:'center', justifyContent:'space-between',
+        padding:'16px 24px', zIndex:1,
+        background:'rgba(2,4,8,0.7)', backdropFilter:'blur(12px)',
+        borderBottom:'1px solid rgba(0,229,255,0.07)',
       }}>
         <div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--neon-gold)', textShadow: '0 0 10px var(--neon-gold)' }}>
-            KARTA O'YINI
-          </div>
-          <div style={{ fontFamily: 'var(--font-ui)', fontSize: 10, color: 'var(--text-dim)', letterSpacing: '0.2em' }}>
-            MULTIPLAYER CASINO
-          </div>
+          <div style={{ fontFamily:'var(--font-d)', fontSize:16, color:'var(--gold)', textShadow:'0 0 10px var(--gold)' }}>KARTA O'YINI</div>
+          <div style={{ fontFamily:'var(--font-ui)', fontSize:9, color:'var(--dim)', letterSpacing:'.2em' }}>ONLINE MULTIPLAYER</div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:12 }}>
           <div style={{
-            padding: '8px 16px', borderRadius: 6,
-            background: 'rgba(0,245,255,0.08)',
-            border: '1px solid rgba(0,245,255,0.2)',
-            fontFamily: 'var(--font-ui)', fontSize: 12, color: 'var(--neon-cyan)',
-            display: 'flex', alignItems: 'center', gap: 8,
+            padding:'7px 14px', borderRadius:6,
+            background:'rgba(0,229,255,0.07)', border:'1px solid rgba(0,229,255,0.2)',
+            fontFamily:'var(--font-ui)', fontSize:11, color:'var(--cyan)',
+            display:'flex', alignItems:'center', gap:7,
           }}>
-            <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--neon-green)', boxShadow: '0 0 6px var(--neon-green)' }} />
+            <div style={{ width:6, height:6, borderRadius:'50%', background:'var(--green)', boxShadow:'0 0 6px var(--green)' }}/>
             {nickname}
           </div>
-          <NeonBtn small danger onClick={onLogout}>CHIQISH</NeonBtn>
+          <Btn small color="red" onClick={onLogout}>CHIQISH</Btn>
         </div>
       </div>
 
       {/* Game cards */}
       <div style={{
-        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '40px 24px', zIndex: 1, gap: 'clamp(16px, 3vw, 40px)',
-        flexWrap: 'wrap',
+        flex:1, display:'flex', alignItems:'center', justifyContent:'center',
+        padding:'30px 20px', zIndex:1, gap:'clamp(16px,3vw,40px)', flexWrap:'wrap',
       }}>
         {games.map((g, i) => (
-          <motion.div
-            key={g.id}
-            initial={{ opacity: 0, y: 60 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.15, type: 'spring', stiffness: 120 }}
-            onClick={() => { SFX.join(); onSelectGame(g.id); }}
-            whileHover={{ scale: 1.04, y: -8 }}
-            whileTap={{ scale: 0.97 }}
+          <motion.div key={g.id}
+            initial={{ opacity:0, y:50 }} animate={{ opacity:1, y:0 }}
+            transition={{ delay:i*.15, type:'spring', stiffness:100 }}
+            onClick={() => { SFX.join(); onSelect(g.id); }}
+            whileHover={{ scale:1.03, y:-8 }} whileTap={{ scale:.97 }}
             style={{
-              width: 'clamp(260px, 38vw, 340px)',
-              padding: '40px 32px',
-              borderRadius: 20,
-              background: `radial-gradient(circle at 30% 30%, ${g.glow}, rgba(7,13,32,0.9))`,
-              border: `1px solid ${g.color}40`,
-              cursor: 'pointer',
-              position: 'relative',
-              overflow: 'hidden',
-              boxShadow: `0 0 40px ${g.glow}, 0 20px 60px rgba(0,0,0,0.5)`,
-              animation: `float ${6 + i * 2}s ease-in-out infinite ${i * 1.5}s`,
+              width:'clamp(260px,38vw,360px)', padding:'36px 30px',
+              borderRadius:20,
+              background:`radial-gradient(circle at 25% 25%, ${g.glow}, rgba(11,20,37,0.9))`,
+              border:`1px solid ${g.color}35`,
+              cursor:'pointer', position:'relative', overflow:'hidden',
+              boxShadow:`0 0 50px ${g.glow}, 0 20px 60px rgba(0,0,0,0.5)`,
+              animation:`float-y ${7+i*2}s ease-in-out ${i*1.5}s infinite`,
             }}
           >
-            {/* Shine effect */}
+            <div className="shimmer-line"/>
+            <div style={{ fontSize:56, marginBottom:18, textAlign:'center', animation:`float-y 4s ease-in-out ${i*.5}s infinite` }}>{g.icon}</div>
+            <h2 style={{ fontFamily:'var(--font-d)', fontSize:20, color:g.color, textShadow:`0 0 12px ${g.color}`, textAlign:'center', marginBottom:6 }}>
+              {g.title}
+            </h2>
+            <div style={{ textAlign:'center', fontFamily:'var(--font-ui)', fontSize:10, color:g.color, opacity:.7, letterSpacing:'.15em', marginBottom:14 }}>
+              {g.sub}
+            </div>
+            <p style={{ color:'rgba(180,210,255,0.55)', fontSize:12.5, textAlign:'center', lineHeight:1.7, marginBottom:20 }}>{g.desc}</p>
+            {/* Mini rules */}
+            <div style={{ borderTop:`1px solid ${g.color}20`, paddingTop:14, display:'flex', flexDirection:'column', gap:5 }}>
+              {g.rules.map((r,ri) => (
+                <div key={ri} style={{ display:'flex', gap:8, alignItems:'flex-start' }}>
+                  <span style={{ color:g.color, fontSize:10, flexShrink:0, marginTop:1 }}>▸</span>
+                  <span style={{ color:'var(--dim)', fontSize:11, lineHeight:1.4 }}>{r}</span>
+                </div>
+              ))}
+            </div>
             <div style={{
-              position: 'absolute', inset: 0,
-              background: 'linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 60%)',
-              pointerEvents: 'none',
-            }} />
-            <div style={{ fontSize: 56, marginBottom: 20, textAlign: 'center' }}>{g.icon}</div>
-            <h2 style={{
-              fontFamily: 'var(--font-display)', fontSize: 22,
-              color: g.color, textShadow: `0 0 15px ${g.color}`,
-              textAlign: 'center', marginBottom: 8,
-            }}>{g.title}</h2>
-            <div style={{
-              textAlign: 'center', fontFamily: 'var(--font-ui)', fontSize: 11,
-              color: g.color, opacity: 0.7, letterSpacing: '0.15em', marginBottom: 16,
-            }}>{g.subtitle}</div>
-            <p style={{ color: 'rgba(200,216,240,0.6)', fontSize: 13, textAlign: 'center', lineHeight: 1.6 }}>{g.desc}</p>
-            <div style={{
-              marginTop: 28, padding: '12px', borderRadius: 8, textAlign: 'center',
-              background: `${g.color}15`, border: `1px solid ${g.color}30`,
-              fontFamily: 'var(--font-ui)', fontSize: 12, color: g.color, letterSpacing: '0.1em',
+              marginTop:22, padding:'11px', borderRadius:8, textAlign:'center',
+              background:`${g.color}12`, border:`1px solid ${g.color}25`,
+              fontFamily:'var(--font-ui)', fontSize:11, color:g.color, letterSpacing:'.1em',
             }}>
               O'YNASH →
             </div>
@@ -645,249 +582,202 @@ function MainMenu({ nickname, onSelectGame, onLogout }) {
   );
 }
 
-// ─── SCREEN: GAME SELECT (Bura 2p/4p) ────────────────────────────
-function GameSelectScreen({ gameMode, onBack, onCreate, onJoin }) {
-  const [tab, setTab] = useState('create'); // create | join
-  const [gameType, setGameType] = useState('2p');
-  const [deckCount, setDeckCount] = useState(1);
-  const [roomCode, setRoomCode] = useState('');
-  const [joining, setJoining] = useState(false);
-
+// ─── SCREEN: GAME SELECT ─────────────────────────────────────────
+function SelectScreen({ gameMode, onBack, onCreate, onJoin }) {
+  const [tab, setTab]       = useState('create');
+  const [type, setType]     = useState('2p');
+  const [decks, setDecks]   = useState(1);
+  const [code, setCode]     = useState('');
+  const [busy, setBusy]     = useState(false);
   const isBura = gameMode === 'bura';
 
   return (
-    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', zIndex: 20, overflow: 'auto' }}>
-      <ParticlesBG />
-      <div style={{ zIndex: 1, maxWidth: 500, margin: '0 auto', width: '100%', padding: '24px 20px' }}>
-        {/* Back */}
-        <NeonBtn small onClick={onBack} style={{ marginBottom: 24 }}>← ORQAGA</NeonBtn>
+    <div style={{ position:'fixed', inset:0, display:'flex', flexDirection:'column', zIndex:20, overflowY:'auto' }}>
+      <BG/>
+      <div style={{ zIndex:1, maxWidth:500, margin:'0 auto', width:'100%', padding:'20px 18px' }}>
+        <Btn small onClick={onBack} style={{ marginBottom:22 }}>← ORQAGA</Btn>
 
-        {/* Title */}
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <div style={{ fontSize: 44, marginBottom: 8 }}>{isBura ? '🃏' : '🔥'}</div>
+        <div style={{ textAlign:'center', marginBottom:28 }}>
+          <div style={{ fontSize:46, marginBottom:10 }}>{isBura?'🃏':'🔥'}</div>
           <h1 style={{
-            fontFamily: 'var(--font-display)', fontSize: 24,
-            color: isBura ? 'var(--neon-gold)' : 'var(--neon-pink)',
-            textShadow: `0 0 15px ${isBura ? 'var(--neon-gold)' : 'var(--neon-pink)'}`,
-          }}>{isBura ? "TO'RT BURA" : '108'}</h1>
+            fontFamily:'var(--font-d)', fontSize:22,
+            color:isBura?'var(--gold)':'var(--pink)',
+            textShadow:`0 0 12px ${isBura?'var(--gold)':'var(--pink)'}`,
+          }}>{isBura?"TO'RT BURA":'108'}</h1>
         </div>
 
         {/* Tabs */}
-        <div style={{
-          display: 'flex', gap: 4, marginBottom: 24,
-          background: 'rgba(255,255,255,0.03)',
-          borderRadius: 10, padding: 4,
-          border: '1px solid rgba(0,245,255,0.1)',
-        }}>
-          {['create', 'join'].map(t => (
-            <button key={t} onClick={() => setTab(t)} style={{
-              flex: 1, padding: '12px', borderRadius: 7,
-              background: tab === t ? 'rgba(0,245,255,0.12)' : 'transparent',
-              border: tab === t ? '1px solid rgba(0,245,255,0.3)' : '1px solid transparent',
-              color: tab === t ? 'var(--neon-cyan)' : 'var(--text-dim)',
-              fontFamily: 'var(--font-ui)', fontSize: 12, fontWeight: 700,
-              letterSpacing: '0.1em', cursor: 'pointer', transition: 'all 0.2s',
-              textTransform: 'uppercase',
-            }}>
-              {t === 'create' ? '+ XONA YARATISH' : '→ XONAGA KIRISH'}
-            </button>
+        <div style={{ display:'flex', gap:3, marginBottom:22, background:'rgba(255,255,255,.02)', borderRadius:9, padding:3, border:'1px solid rgba(0,229,255,.09)' }}>
+          {[['create','+ XONA YARATISH'],['join','→ XONAGA KIRISH']].map(([t,l]) => (
+            <button key={t} onClick={()=>setTab(t)} style={{
+              flex:1, padding:'11px', borderRadius:7,
+              background:tab===t?'rgba(0,229,255,0.1)':'transparent',
+              border:tab===t?'1px solid rgba(0,229,255,0.3)':'1px solid transparent',
+              color:tab===t?'var(--cyan)':'var(--dim)',
+              fontFamily:'var(--font-ui)', fontSize:11, fontWeight:700, letterSpacing:'.08em',
+              cursor:'pointer', transition:'all .2s', textTransform:'uppercase',
+            }}>{l}</button>
           ))}
         </div>
 
-        {/* Create form */}
-        {tab === 'create' && (
-          <motion.div key="create" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="glass" style={{ borderRadius: 16, padding: '28px 24px' }}>
-              {isBura && (
-                <div style={{ marginBottom: 24 }}>
-                  <p style={{ color: 'var(--text-dim)', fontFamily: 'var(--font-ui)', fontSize: 11, letterSpacing: '0.15em', marginBottom: 12 }}>
-                    O'YINCHILAR SONI
-                  </p>
-                  <div style={{ display: 'flex', gap: 10 }}>
-                    {[['2p', '2 KISHILIK'], ['4p', '4 KISHILIK (2v2)']].map(([val, label]) => (
-                      <button key={val} onClick={() => setGameType(val)} style={{
-                        flex: 1, padding: '14px 10px',
-                        borderRadius: 8,
-                        background: gameType === val ? 'rgba(255,215,0,0.12)' : 'rgba(255,255,255,0.03)',
-                        border: `1px solid ${gameType === val ? 'var(--neon-gold)' : 'rgba(255,255,255,0.08)'}`,
-                        color: gameType === val ? 'var(--neon-gold)' : 'var(--text-dim)',
-                        fontFamily: 'var(--font-ui)', fontSize: 11, fontWeight: 700,
-                        letterSpacing: '0.08em', cursor: 'pointer', transition: 'all 0.2s',
-                      }}>{label}</button>
-                    ))}
+        <AnimatePresence mode="wait">
+          {tab === 'create' ? (
+            <motion.div key="cr" initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} exit={{opacity:0}}>
+              <div className="glass" style={{ borderRadius:16, padding:'26px 22px' }}>
+                {isBura && (
+                  <div style={{ marginBottom:22 }}>
+                    <p style={{ color:'var(--dim)', fontFamily:'var(--font-ui)', fontSize:10, letterSpacing:'.15em', marginBottom:10 }}>O'YINCHILAR SONI</p>
+                    <div style={{ display:'flex', gap:8 }}>
+                      {[['2p','2 KISHILIK'],['4p','4 KISHILIK (2v2)']].map(([v,l]) => (
+                        <button key={v} onClick={()=>setType(v)} style={{
+                          flex:1, padding:'13px 8px', borderRadius:8,
+                          background:type===v?'rgba(245,200,66,0.12)':'rgba(255,255,255,0.03)',
+                          border:`1px solid ${type===v?'var(--gold)':'rgba(255,255,255,0.07)'}`,
+                          color:type===v?'var(--gold)':'var(--dim)',
+                          fontFamily:'var(--font-ui)', fontSize:10.5, fontWeight:700,
+                          letterSpacing:'.07em', cursor:'pointer', transition:'all .2s',
+                        }}>{l}</button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
-
-              {!isBura && (
-                <div style={{ marginBottom: 24 }}>
-                  <p style={{ color: 'var(--text-dim)', fontFamily: 'var(--font-ui)', fontSize: 11, letterSpacing: '0.15em', marginBottom: 12 }}>
-                    DAST SONI
-                  </p>
-                  <div style={{ display: 'flex', gap: 10 }}>
-                    {[1, 2, 3].map(d => (
-                      <button key={d} onClick={() => setDeckCount(d)} style={{
-                        flex: 1, padding: '14px 10px',
-                        borderRadius: 8,
-                        background: deckCount === d ? 'rgba(255,0,110,0.12)' : 'rgba(255,255,255,0.03)',
-                        border: `1px solid ${deckCount === d ? 'var(--neon-pink)' : 'rgba(255,255,255,0.08)'}`,
-                        color: deckCount === d ? 'var(--neon-pink)' : 'var(--text-dim)',
-                        fontFamily: 'var(--font-ui)', fontSize: 12, fontWeight: 700,
-                        cursor: 'pointer', transition: 'all 0.2s',
-                      }}>{d} DAST</button>
-                    ))}
+                )}
+                {!isBura && (
+                  <div style={{ marginBottom:22 }}>
+                    <p style={{ color:'var(--dim)', fontFamily:'var(--font-ui)', fontSize:10, letterSpacing:'.15em', marginBottom:10 }}>DAST SONI</p>
+                    <div style={{ display:'flex', gap:8 }}>
+                      {[1,2,3].map(d => (
+                        <button key={d} onClick={()=>setDecks(d)} style={{
+                          flex:1, padding:'13px 8px', borderRadius:8,
+                          background:decks===d?'rgba(255,45,110,0.12)':'rgba(255,255,255,0.03)',
+                          border:`1px solid ${decks===d?'var(--pink)':'rgba(255,255,255,0.07)'}`,
+                          color:decks===d?'var(--pink)':'var(--dim)',
+                          fontFamily:'var(--font-ui)', fontSize:12, fontWeight:700,
+                          cursor:'pointer', transition:'all .2s',
+                        }}>{d} DAST</button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
-
-              <NeonBtn
-                color={isBura ? 'gold' : 'pink'}
-                onClick={() => onCreate({ gameMode, gameType, deckCount })}
-                style={{ width: '100%', padding: '16px', fontSize: 14 }}
-              >
-                XONA YARATISH
-              </NeonBtn>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Join form */}
-        {tab === 'join' && (
-          <motion.div key="join" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="glass" style={{ borderRadius: 16, padding: '28px 24px' }}>
-              <p style={{ color: 'var(--text-dim)', fontFamily: 'var(--font-ui)', fontSize: 11, letterSpacing: '0.15em', marginBottom: 12 }}>
-                XONA KODI (6 raqam)
-              </p>
-              <div style={{ marginBottom: 20 }}>
-                <NeonInput
-                  value={roomCode}
-                  onChange={v => setRoomCode(v.replace(/\D/g, '').slice(0, 6))}
-                  placeholder="123456"
-                  maxLength={6}
-                  onKeyDown={e => e.key === 'Enter' && roomCode.length === 6 && onJoin(roomCode)}
-                />
+                )}
+                <Btn color={isBura?'gold':'pink'} onClick={()=>onCreate({gameMode,gameType:type,deckCount:decks})} full sx={{padding:'15px',fontSize:13}}>
+                  XONA YARATISH
+                </Btn>
               </div>
-              <NeonBtn
-                color="cyan"
-                disabled={roomCode.length !== 6 || joining}
-                onClick={() => { setJoining(true); onJoin(roomCode); }}
-                style={{ width: '100%', padding: '16px', fontSize: 14 }}
-              >
-                {joining ? 'KIRILMOQDA...' : 'XONAGA KIRISH →'}
-              </NeonBtn>
-            </div>
-          </motion.div>
-        )}
+            </motion.div>
+          ) : (
+            <motion.div key="jo" initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} exit={{opacity:0}}>
+              <div className="glass" style={{ borderRadius:16, padding:'26px 22px' }}>
+                <p style={{ color:'var(--dim)', fontFamily:'var(--font-ui)', fontSize:10, letterSpacing:'.15em', marginBottom:10 }}>XONA KODI (6 raqam)</p>
+                <div style={{ marginBottom:18 }}>
+                  <Input value={code} onChange={v=>setCode(v.replace(/\D/g,'').slice(0,6))} placeholder="123456" maxLength={6} onKeyDown={e=>e.key==='Enter'&&code.length===6&&onJoin(code)}/>
+                </div>
+                <Btn color="cyan" disabled={code.length!==6||busy} onClick={()=>{setBusy(true);onJoin(code);}} full sx={{padding:'15px',fontSize:13}}>
+                  {busy?'KIRILMOQDA...':'XONAGA KIRISH →'}
+                </Btn>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
 }
 
 // ─── SCREEN: LOBBY ────────────────────────────────────────────────
-function LobbyScreen({ room, nickname, socketId, onStart, onLeave, onToggleReady, onSendChat, chatMessages, typingUsers }) {
-  const [chatText, setChatText] = useState('');
+function LobbyScreen({ room, nickname, socketId, onStart, onLeave, onToggleReady, onSendChat, chats, typingUsers }) {
+  const [msg, setMsg] = useState('');
   const [copied, setCopied] = useState(false);
-  const chatEndRef = useRef(null);
-
-  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [chatMessages]);
-
-  const isHost = room.host === socketId;
+  const chatRef = useRef(null);
+  const isHost  = room.host === socketId;
   const isReady = room.readyPlayers?.includes(socketId);
-  const canStart = isHost && room.players.length >= room.minPlayers;
+  const canStart= isHost && room.players.length >= room.minPlayers;
+
+  useEffect(() => { chatRef.current?.scrollIntoView({behavior:'smooth'}); }, [chats]);
 
   function copyCode() {
-    navigator.clipboard.writeText(room.id).catch(() => {});
+    navigator.clipboard.writeText(room.id).catch(()=>{});
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(()=>setCopied(false), 2000);
+  }
+  function send() {
+    if (!msg.trim()) return;
+    onSendChat(msg.trim());
+    setMsg('');
   }
 
-  function sendChat() {
-    if (!chatText.trim()) return;
-    onSendChat(chatText);
-    setChatText('');
-  }
+  const avatarColor = (nick) => `hsl(${nick.charCodeAt(0)*13%360},55%,28%)`;
+  const avatarBorder= (nick) => `hsl(${nick.charCodeAt(0)*13%360},75%,50%)`;
 
   return (
-    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', zIndex: 20 }}>
-      <ParticlesBG />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', zIndex: 1, overflow: 'hidden', maxWidth: 680, margin: '0 auto', width: '100%', padding: '16px' }}>
+    <div style={{ position:'fixed', inset:0, display:'flex', flexDirection:'column', zIndex:20 }}>
+      <BG/>
+      <div style={{ flex:1, display:'flex', flexDirection:'column', zIndex:1, overflow:'hidden', maxWidth:680, margin:'0 auto', width:'100%', padding:'14px 16px' }}>
 
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
           <div>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--neon-gold)', textShadow: '0 0 10px var(--neon-gold)' }}>
-              {room.gameMode === 'bura' ? "TO'RT BURA" : '108'}
+            <h2 style={{ fontFamily:'var(--font-d)', fontSize:16, color:'var(--gold)', textShadow:'0 0 8px var(--gold)' }}>
+              {room.gameMode==='bura'?"TO'RT BURA":'108'} — LOBBY
             </h2>
-            <p style={{ color: 'var(--text-dim)', fontSize: 11, fontFamily: 'var(--font-ui)' }}>
-              {room.players.length}/{room.maxPlayers} O'YINCHI
+            <p style={{ color:'var(--dim)', fontSize:10, fontFamily:'var(--font-ui)' }}>
+              {room.players.length}/{room.maxPlayers} O'YINCHI • {room.gameMode==='bura'?`${room.gameType==='4p'?'4 KISHILIK 2v2':'2 KISHILIK'}`:`${room.deckCount} DAST`}
             </p>
           </div>
-          <NeonBtn small danger onClick={onLeave}>CHIQISH</NeonBtn>
+          <Btn small color="red" onClick={onLeave}>CHIQISH</Btn>
         </div>
 
         {/* Room code */}
-        <div className="glass" style={{ borderRadius: 12, padding: '16px 20px', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div className="glass" style={{ borderRadius:12, padding:'14px 18px', marginBottom:12, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
           <div>
-            <p style={{ color: 'var(--text-dim)', fontFamily: 'var(--font-ui)', fontSize: 10, letterSpacing: '0.2em', marginBottom: 4 }}>XONA KODI</p>
-            <div style={{
-              fontFamily: 'var(--font-ui)', fontSize: 28, fontWeight: 900,
-              color: 'var(--neon-cyan)', letterSpacing: '0.3em',
-              textShadow: '0 0 15px var(--neon-cyan)',
-            }}>{room.id}</div>
+            <p style={{ color:'var(--dim)', fontFamily:'var(--font-ui)', fontSize:9, letterSpacing:'.2em', marginBottom:3 }}>XONA KODI</p>
+            <div style={{ fontFamily:'var(--font-ui)', fontSize:26, fontWeight:900, color:'var(--cyan)', letterSpacing:'.3em', textShadow:'0 0 12px var(--cyan)' }}>
+              {room.id}
+            </div>
           </div>
-          <NeonBtn small color="cyan" onClick={copyCode}>
-            {copied ? '✓ NUSXA' : 'NUSXA'}
-          </NeonBtn>
+          <Btn small color="cyan" onClick={copyCode}>{copied?'✓ NUSXA':'NUSXA OLISH'}</Btn>
         </div>
 
         {/* Players */}
-        <div className="glass" style={{ borderRadius: 12, padding: '16px', marginBottom: 16 }}>
-          <p style={{ color: 'var(--text-dim)', fontFamily: 'var(--font-ui)', fontSize: 10, letterSpacing: '0.2em', marginBottom: 12 }}>O'YINCHILAR</p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            {Array.from({ length: room.maxPlayers }).map((_, i) => {
+        <div className="glass" style={{ borderRadius:12, padding:'14px', marginBottom:12 }}>
+          <p style={{ color:'var(--dim)', fontFamily:'var(--font-ui)', fontSize:9, letterSpacing:'.2em', marginBottom:10 }}>O'YINCHILAR</p>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+            {Array.from({length:room.maxPlayers}).map((_,i) => {
               const p = room.players[i];
               const isMe = p?.id === socketId;
               const isHostP = p?.id === room.host;
               const rdy = room.readyPlayers?.includes(p?.id);
               return (
-                <motion.div
-                  key={i}
-                  initial={p ? { scale: 0.8, opacity: 0 } : {}}
-                  animate={p ? { scale: 1, opacity: 1 } : {}}
+                <motion.div key={i}
+                  initial={p?{scale:.85,opacity:0}:{}}
+                  animate={p?{scale:1,opacity:1}:{}}
                   style={{
-                    padding: '12px 14px', borderRadius: 8,
-                    background: p ? (isMe ? 'rgba(0,245,255,0.08)' : 'rgba(255,255,255,0.04)') : 'rgba(255,255,255,0.02)',
-                    border: p ? (isMe ? '1px solid rgba(0,245,255,0.3)' : '1px solid rgba(255,255,255,0.08)') : '1px dashed rgba(255,255,255,0.06)',
-                    display: 'flex', alignItems: 'center', gap: 8,
+                    padding:'10px 12px', borderRadius:8,
+                    background:p?(isMe?'rgba(0,229,255,0.07)':'rgba(255,255,255,0.03)'):'rgba(255,255,255,0.015)',
+                    border:p?(isMe?'1px solid rgba(0,229,255,0.25)':'1px solid rgba(255,255,255,0.07)'):'1px dashed rgba(255,255,255,0.05)',
+                    display:'flex', alignItems:'center', gap:8,
                   }}
                 >
                   {p ? (
                     <>
                       <div style={{
-                        width: 32, height: 32, borderRadius: '50%',
-                        background: `hsl(${p.nickname.charCodeAt(0) * 7 % 360}, 60%, 30%)`,
-                        border: `2px solid hsl(${p.nickname.charCodeAt(0) * 7 % 360}, 80%, 50%)`,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 14, fontWeight: 700, color: 'white',
-                        flexShrink: 0,
-                      }}>
-                        {p.nickname[0].toUpperCase()}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 13, fontWeight: 600, truncate: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden' }}>
-                          {p.nickname} {isMe && <span style={{ color: 'var(--neon-cyan)', fontSize: 10 }}>(sen)</span>}
+                        width:30, height:30, borderRadius:'50%',
+                        background:avatarColor(p.nickname),
+                        border:`2px solid ${avatarBorder(p.nickname)}`,
+                        display:'flex', alignItems:'center', justifyContent:'center',
+                        fontSize:13, fontWeight:700, color:'#fff', flexShrink:0,
+                      }}>{p.nickname[0].toUpperCase()}</div>
+                      <div style={{ flex:1, minWidth:0 }}>
+                        <div style={{ fontSize:12.5, fontWeight:600, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
+                          {p.nickname} {isMe && <span style={{ color:'var(--cyan)', fontSize:9 }}>(sen)</span>}
                         </div>
-                        <div style={{ fontSize: 10, color: isHostP ? 'var(--neon-gold)' : rdy ? 'var(--neon-green)' : 'var(--text-dim)', fontFamily: 'var(--font-ui)' }}>
-                          {isHostP ? '👑 HOST' : rdy ? '✓ TAYYOR' : 'KUTMOQDA...'}
+                        <div style={{ fontSize:9.5, fontFamily:'var(--font-ui)', color:isHostP?'var(--gold)':rdy?'var(--green)':'var(--dim)' }}>
+                          {isHostP?'👑 HOST':rdy?'✓ TAYYOR':'kutmoqda...'}
                         </div>
                       </div>
                     </>
                   ) : (
-                    <div style={{ color: 'var(--text-dim)', fontSize: 12, fontFamily: 'var(--font-ui)', width: '100%', textAlign: 'center' }}>
-                      <motion.span animate={{ opacity: [0.3, 0.8, 0.3] }} transition={{ repeat: Infinity, duration: 1.5 }}>
-                        BO'SH SLOT...
-                      </motion.span>
-                    </div>
+                    <motion.div animate={{opacity:[.3,.7,.3]}} transition={{repeat:Infinity,duration:1.5}}
+                      style={{ color:'var(--dimmer)', fontSize:11, fontFamily:'var(--font-ui)', width:'100%', textAlign:'center' }}
+                    >BO'SH SLOT...</motion.div>
                   )}
                 </motion.div>
               );
@@ -896,64 +786,46 @@ function LobbyScreen({ room, nickname, socketId, onStart, onLeave, onToggleReady
         </div>
 
         {/* Chat */}
-        <div className="glass" style={{ borderRadius: 12, padding: '12px', marginBottom: 16, flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-          <p style={{ color: 'var(--text-dim)', fontFamily: 'var(--font-ui)', fontSize: 10, letterSpacing: '0.2em', marginBottom: 8 }}>CHAT</p>
-          <div style={{ flex: 1, overflowY: 'auto', marginBottom: 8, minHeight: 0 }}>
-            <AnimatePresence>
-              {chatMessages.map(m => (
-                <motion.div key={m.id}
-                  initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
-                  style={{ marginBottom: 6, display: 'flex', gap: 8, alignItems: 'baseline' }}
-                >
-                  <span style={{ color: 'var(--neon-cyan)', fontSize: 12, fontWeight: 700, flexShrink: 0 }}>{m.nickname}:</span>
-                  <span style={{ color: 'var(--text-primary)', fontSize: 13 }}>{m.text}</span>
-                </motion.div>
-              ))}
-            </AnimatePresence>
+        <div className="glass" style={{ borderRadius:12, padding:'12px', marginBottom:12, flex:1, display:'flex', flexDirection:'column', minHeight:0, overflow:'hidden' }}>
+          <p style={{ color:'var(--dim)', fontFamily:'var(--font-ui)', fontSize:9, letterSpacing:'.2em', marginBottom:8 }}>CHAT</p>
+          <div style={{ flex:1, overflowY:'auto', marginBottom:8, minHeight:0 }}>
+            {chats.map(m => (
+              <div key={m.id} style={{ marginBottom:5, display:'flex', gap:7, alignItems:'baseline' }}>
+                <span style={{ color:'var(--cyan)', fontSize:11.5, fontWeight:700, flexShrink:0 }}>{m.nickname}:</span>
+                <span style={{ color:'var(--text)', fontSize:12.5 }}>{m.text}</span>
+              </div>
+            ))}
             {typingUsers.length > 0 && (
-              <div style={{ color: 'var(--text-dim)', fontSize: 11, fontStyle: 'italic' }}>
+              <div style={{ color:'var(--dim)', fontSize:10.5, fontStyle:'italic' }}>
                 {typingUsers.join(', ')} yozmoqda...
               </div>
             )}
-            <div ref={chatEndRef} />
+            <div ref={chatRef}/>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <input
-              value={chatText}
-              onChange={e => { setChatText(e.target.value); }}
-              onKeyDown={e => e.key === 'Enter' && sendChat()}
-              placeholder="Xabar..."
+          <div style={{ display:'flex', gap:8 }}>
+            <input value={msg} onChange={e=>setMsg(e.target.value)} onKeyDown={e=>e.key==='Enter'&&send()} placeholder="Xabar..."
               style={{
-                flex: 1, background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(0,245,255,0.15)', borderRadius: 6,
-                color: 'var(--text-primary)', padding: '8px 12px', fontSize: 13,
-                fontFamily: 'var(--font-body)', outline: 'none',
+                flex:1, background:'rgba(255,255,255,0.03)',
+                border:'1px solid rgba(0,229,255,0.13)', borderRadius:6,
+                color:'var(--text)', padding:'8px 12px', fontSize:12.5,
+                fontFamily:'var(--font-b)', outline:'none',
               }}
             />
-            <NeonBtn small onClick={sendChat}>↑</NeonBtn>
+            <Btn small onClick={send}>↑</Btn>
           </div>
         </div>
 
         {/* Actions */}
-        <div style={{ display: 'flex', gap: 12 }}>
+        <div style={{ display:'flex', gap:10 }}>
           {!isHost && (
-            <NeonBtn
-              color={isReady ? 'green' : 'cyan'}
-              onClick={onToggleReady}
-              style={{ flex: 1, padding: '14px' }}
-            >
-              {isReady ? '✓ TAYYOR' : 'TAYYOR'}
-            </NeonBtn>
+            <Btn color={isReady?'green':'cyan'} onClick={onToggleReady} full sx={{padding:'13px'}}>
+              {isReady?'✓ TAYYOR':'TAYYOR'}
+            </Btn>
           )}
           {isHost && (
-            <NeonBtn
-              color="gold"
-              disabled={!canStart}
-              onClick={onStart}
-              style={{ flex: 1, padding: '14px', fontSize: 14 }}
-            >
-              {canStart ? '▶ O\'YINNI BOSHLASH' : `KUTISH... (${room.players.length}/${room.minPlayers})`}
-            </NeonBtn>
+            <Btn color="gold" disabled={!canStart} onClick={onStart} full sx={{padding:'13px',fontSize:13}}>
+              {canStart?'▶ BOSHLASH':`KUTISH... (${room.players.length}/${room.minPlayers})`}
+            </Btn>
           )}
         </div>
       </div>
@@ -962,366 +834,620 @@ function LobbyScreen({ room, nickname, socketId, onStart, onLeave, onToggleReady
 }
 
 // ─── BURA GAME SCREEN ─────────────────────────────────────────────
-function BuraGame({ room, gameState, myHand, socketId, nickname, onPlayCard, onLeave, onPlayAgain }) {
-  const [selectedCard, setSelectedCard] = useState(null);
-  const isMyTurn = gameState?.currentPlayer === socketId;
-  const trumpSuit = gameState?.trumpSuit;
+function BuraScreen({ room, gs, myHand, socketId, nickname, onPlay, onThrow, onLeave, onPlayAgain, onNextRound }) {
+  const [selected, setSelected] = useState(null);
+  const [shakeCard, setShakeCard] = useState(null);
   const players = room.players;
-  const myIdx = players.findIndex(p => p.id === socketId);
-  const isTeam = room.gameType === '4p';
-  const teams = gameState?.teams;
+  const myIdx   = players.findIndex(p => p.id === socketId);
+  const trump   = gs?.trumpSuit;
+  const phase2  = gs?.phase2;
+  const isAttacker = gs?.attackerId === socketId;
+  const isDefender = gs?.defenderId === socketId;
+  const isMyTurn   = gs?.currentPlayer === socketId;
 
-  // Determine playable cards
-  const playableCards = useMemo(() => {
-    if (!isMyTurn || !myHand) return new Set();
-    const trick = gameState?.currentTrick || [];
-    if (trick.length === 0) return new Set(myHand.map(c => c.id));
-
-    const ledSuit = trick[0].card.suit;
-    const hasSuit = myHand.some(c => c.suit === ledSuit);
-    const hasTrump = myHand.some(c => c.suit === trumpSuit);
-
-    if (hasSuit) {
-      return new Set(myHand.filter(c => c.suit === ledSuit || c.suit === trumpSuit).map(c => c.id));
+  // What can I play?
+  const playable = useMemo(() => {
+    if (!myHand || !gs) return new Set();
+    if (!isMyTurn) return new Set();
+    
+    if (phase2 === 'attacking' && isAttacker) {
+      return new Set(myHand.map(c => c.id));
     }
-    if (hasTrump) {
-      return new Set(myHand.filter(c => c.suit === trumpSuit).map(c => c.id));
+    if (phase2 === 'defending' && isDefender) {
+      const lastAttack = gs.attackCards[gs.attackCards.length - 1];
+      if (!lastAttack) return new Set();
+      return new Set(myHand.filter(c => {
+        // Can beat if same suit + higher rank, or trump over non-trump
+        if (c.suit === lastAttack.suit) {
+          return RANK_ORDER.indexOf(c.rank) > RANK_ORDER.indexOf(lastAttack.rank);
+        }
+        if (c.suit === trump && lastAttack.suit !== trump) return true;
+        return false;
+      }).map(c => c.id));
     }
-    return new Set(myHand.map(c => c.id));
-  }, [isMyTurn, myHand, gameState?.currentTrick, trumpSuit]);
+    return new Set();
+  }, [myHand, gs, isMyTurn, isAttacker, isDefender, phase2, trump]);
 
   function handleCardClick(card) {
-    if (!isMyTurn) return;
-    if (selectedCard?.id === card.id) {
-      // Play it
-      SFX.cardPlay();
-      onPlayCard(card.id);
-      setSelectedCard(null);
+    if (!playable.has(card.id)) {
+      setShakeCard(card.id);
+      SFX.error();
+      setTimeout(() => setShakeCard(null), 500);
+      return;
+    }
+    if (selected?.id === card.id) {
+      SFX.play();
+      onPlay(card.id);
+      setSelected(null);
     } else {
-      setSelectedCard(card);
+      setSelected(card);
     }
   }
 
-  if (gameState?.phase === 'roundOver' || gameState?.phase === 'gameOver') {
-    return <GameOverScreen gameState={gameState} room={room} socketId={socketId} onPlayAgain={onPlayAgain} onLeave={onLeave} mode="bura" />;
+  function handleThrow() {
+    SFX.throw_();
+    onThrow();
+    setSelected(null);
   }
 
-  // Arrange players around table
-  // My player at bottom, others arranged top/left/right
-  const getPlayerPosition = (idx) => {
-    const relIdx = (idx - myIdx + players.length) % players.length;
-    if (players.length === 2) {
-      return relIdx === 0 ? 'bottom' : 'top';
-    }
-    // 4 player: bottom, right, top, left
-    return ['bottom', 'right', 'top', 'left'][relIdx] || 'top';
+  // Round over screen
+  if (gs?.phase === 'roundOver') {
+    return <BuraRoundOver gs={gs} room={room} socketId={socketId} onNext={onNextRound} onLeave={onLeave}/>;
+  }
+  if (gs?.phase === 'gameOver') {
+    return <BuraGameOver gs={gs} room={room} socketId={socketId} onPlayAgain={onPlayAgain} onLeave={onLeave}/>;
+  }
+
+  const getPos = (idx) => {
+    const rel = (idx - myIdx + players.length) % players.length;
+    if (players.length === 2) return rel === 0 ? 'bottom' : 'top';
+    return ['bottom','right','top','left'][rel] || 'top';
   };
 
-  const teamColor = (pid) => {
-    if (!teams) return 'var(--neon-cyan)';
-    return teams.team1.includes(pid) ? 'var(--neon-cyan)' : 'var(--neon-pink)';
+  const penaltyBar = (pen) => {
+    const bars = [];
+    for (let i = 0; i < 12; i++) {
+      bars.push(
+        <div key={i} style={{
+          width:8, height:8, borderRadius:2,
+          background: i < pen ? 'var(--red)' : 'rgba(255,255,255,0.08)',
+          border: i < pen ? '1px solid var(--red)' : '1px solid rgba(255,255,255,0.05)',
+        }}/>
+      );
+    }
+    return bars;
   };
+
+  const myPenalty = gs?.penalties?.[socketId] || 0;
+  const myScore   = gs?.scores?.[socketId] || 0;
 
   return (
-    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', zIndex: 20, overflow: 'hidden' }}>
-      <ParticlesBG />
+    <div style={{ position:'fixed', inset:0, display:'flex', flexDirection:'column', zIndex:20, overflow:'hidden' }}>
+      <BG variant="game"/>
 
-      {/* Top bar */}
+      {/* TOP BAR */}
       <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '10px 16px', zIndex: 10,
-        background: 'rgba(3,5,16,0.85)', backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid rgba(0,245,255,0.08)',
+        display:'flex', alignItems:'center', justifyContent:'space-between',
+        padding:'8px 14px', zIndex:10,
+        background:'rgba(2,4,8,0.82)', backdropFilter:'blur(12px)',
+        borderBottom:'1px solid rgba(0,229,255,0.07)',
       }}>
-        <div style={{ display: 'flex', align: 'center', gap: 12 }}>
-          {/* Trump */}
-          {trumpSuit && (
+        <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+          {/* Trump display */}
+          {trump && (
             <div style={{
-              display: 'flex', alignItems: 'center', gap: 6,
-              padding: '6px 12px', borderRadius: 6,
-              background: 'rgba(255,215,0,0.1)', border: '1px solid rgba(255,215,0,0.3)',
+              display:'flex', alignItems:'center', gap:5,
+              padding:'5px 10px', borderRadius:6,
+              background:'rgba(245,200,66,0.1)', border:'1px solid rgba(245,200,66,0.3)',
             }}>
-              <span style={{ color: SUIT_COLOR[trumpSuit], fontSize: 18 }}>{SUIT_SYMBOL[trumpSuit]}</span>
-              <span style={{ color: 'var(--neon-gold)', fontSize: 10, fontFamily: 'var(--font-ui)' }}>KOZIR</span>
+              <span style={{ color:SUIT_CLR[trump], fontSize:18 }}>{SUIT_SYM[trump]}</span>
+              <span style={{ color:'var(--gold)', fontSize:9, fontFamily:'var(--font-ui)' }}>KOZIR</span>
+            </div>
+          )}
+          {/* Deck remaining */}
+          {gs?.deckRemaining > 0 && (
+            <div style={{ fontFamily:'var(--font-ui)', fontSize:10, color:'var(--dim)' }}>
+              🃏 {gs.deckRemaining}
             </div>
           )}
           {/* Scores */}
-          {isTeam ? (
-            <div style={{ display: 'flex', gap: 8 }}>
-              <div style={{ padding: '4px 10px', borderRadius: 4, background: 'rgba(0,245,255,0.08)', fontFamily: 'var(--font-ui)', fontSize: 11, color: 'var(--neon-cyan)' }}>
-                JAMOА 1: {gameState?.teamScores?.team1 || 0}
+          {gs?.teams ? (
+            <div style={{ display:'flex', gap:6 }}>
+              <div style={{ padding:'4px 8px', borderRadius:4, background:'rgba(0,229,255,0.07)', fontFamily:'var(--font-ui)', fontSize:10, color:'var(--cyan)' }}>
+                JAMOA 1: {gs.teamScores?.team1||0}pts
               </div>
-              <div style={{ padding: '4px 10px', borderRadius: 4, background: 'rgba(255,0,110,0.08)', fontFamily: 'var(--font-ui)', fontSize: 11, color: 'var(--neon-pink)' }}>
-                JAMOА 2: {gameState?.teamScores?.team2 || 0}
+              <div style={{ padding:'4px 8px', borderRadius:4, background:'rgba(255,45,110,0.07)', fontFamily:'var(--font-ui)', fontSize:10, color:'var(--pink)' }}>
+                JAMOA 2: {gs.teamScores?.team2||0}pts
               </div>
             </div>
           ) : (
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ display:'flex', gap:5 }}>
               {players.map(p => (
                 <div key={p.id} style={{
-                  padding: '4px 10px', borderRadius: 4,
-                  background: 'rgba(0,245,255,0.06)', fontFamily: 'var(--font-ui)', fontSize: 11,
-                  color: p.id === socketId ? 'var(--neon-cyan)' : 'var(--text-dim)',
+                  padding:'4px 8px', borderRadius:4,
+                  background:p.id===socketId?'rgba(0,229,255,0.07)':'rgba(255,255,255,0.03)',
+                  fontFamily:'var(--font-ui)', fontSize:10,
+                  color:p.id===socketId?'var(--cyan)':'var(--dim)',
                 }}>
-                  {p.nickname}: {gameState?.scores?.[p.id] || 0}
+                  {p.nickname.slice(0,8)}: {gs?.scores?.[p.id]||0}pt
                 </div>
               ))}
             </div>
           )}
         </div>
-        <NeonBtn small danger onClick={onLeave}>CHIQISH</NeonBtn>
+        <div style={{ display:'flex', gap:8 }}>
+          {/* My penalty meter */}
+          <div style={{ display:'flex', alignItems:'center', gap:5 }}>
+            <span style={{ fontFamily:'var(--font-ui)', fontSize:9, color:'var(--dim)' }}>JARIMA:</span>
+            <div style={{ display:'flex', gap:2, flexWrap:'wrap', maxWidth:120 }}>{penaltyBar(myPenalty)}</div>
+            <span style={{ fontFamily:'var(--font-ui)', fontSize:10, color: myPenalty >= 9 ? 'var(--red)' : 'var(--dim)' }}>
+              {myPenalty}/12
+            </span>
+          </div>
+          <Btn small color="red" onClick={onLeave}>✕</Btn>
+        </div>
       </div>
 
-      {/* Table area */}
-      <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      {/* TABLE AREA */}
+      <div style={{ flex:1, position:'relative', display:'flex', alignItems:'center', justifyContent:'center', overflow:'hidden' }}>
 
-        {/* Casino table */}
+        {/* Green felt table */}
         <div style={{
-          width: 'min(85vw, 500px)', height: 'min(45vw, 280px)',
-          borderRadius: '50%',
-          background: 'radial-gradient(ellipse at center, #1a4a2a 0%, #0d3018 60%, #071a0e 100%)',
-          border: '6px solid rgba(255,215,0,0.25)',
-          boxShadow: 'inset 0 0 60px rgba(0,0,0,0.6), 0 0 40px rgba(0,100,30,0.2)',
-          position: 'absolute',
-        }} />
+          width:'min(80vw,480px)', height:'min(42vw,260px)',
+          borderRadius:'50%',
+          background:'radial-gradient(ellipse at center, #1d5c35 0%, #0e3a1e 55%, #071811 100%)',
+          border:'5px solid rgba(255,215,0,0.2)',
+          boxShadow:'inset 0 0 60px rgba(0,0,0,0.6), 0 0 40px rgba(0,80,30,0.15), inset 0 0 30px rgba(0,100,40,0.15)',
+          position:'absolute',
+        }}/>
 
-        {/* Other players around table */}
+        {/* Opponents */}
         {players.map((p, i) => {
           if (p.id === socketId) return null;
-          const pos = getPlayerPosition(i);
-          const isCurrent = gameState?.currentPlayer === p.id;
-          const handSize = gameState?.handSizes?.[p.id] || 0;
+          const pos = getPos(i);
+          const isCurrent = gs?.currentPlayer === p.id;
+          const isAtt = gs?.attackerId === p.id;
+          const isDef = gs?.defenderId === p.id;
+          const hSize = gs?.handSizes?.[p.id] || 0;
+          const pPen  = gs?.penalties?.[p.id] || 0;
 
-          const posStyle = {
-            top: { top: 8, left: '50%', transform: 'translateX(-50%)', flexDirection: 'column', alignItems: 'center' },
-            left: { left: 8, top: '50%', transform: 'translateY(-50%)', flexDirection: 'column', alignItems: 'center' },
-            right: { right: 8, top: '50%', transform: 'translateY(-50%)', flexDirection: 'column', alignItems: 'center' },
+          const posStyles = {
+            top:   { position:'absolute', top:8, left:'50%', transform:'translateX(-50%)', flexDirection:'column', alignItems:'center' },
+            left:  { position:'absolute', left:8, top:'50%', transform:'translateY(-50%)', flexDirection:'column', alignItems:'center' },
+            right: { position:'absolute', right:8, top:'50%', transform:'translateY(-50%)', flexDirection:'column', alignItems:'center' },
           };
 
           return (
-            <div key={p.id} style={{
-              position: 'absolute', display: 'flex', gap: 6, zIndex: 5,
-              ...posStyle[pos],
-            }}>
-              {/* Opponent avatar */}
+            <div key={p.id} style={{ display:'flex', gap:6, zIndex:5, ...posStyles[pos] }}>
               <div style={{
-                padding: '6px 12px', borderRadius: 8, textAlign: 'center',
-                background: isCurrent ? 'rgba(0,255,136,0.12)' : 'rgba(255,255,255,0.04)',
-                border: `1px solid ${isCurrent ? 'var(--neon-green)' : teamColor(p.id) + '40'}`,
-                boxShadow: isCurrent ? '0 0 20px rgba(0,255,136,0.3)' : 'none',
+                padding:'6px 12px', borderRadius:8, textAlign:'center',
+                background:isCurrent?'rgba(0,255,148,0.1)':'rgba(255,255,255,0.03)',
+                border:`1px solid ${isCurrent?'var(--green)':isAtt?'rgba(255,200,66,0.3)':isDef?'rgba(0,229,255,0.3)':'rgba(255,255,255,0.07)'}`,
+                boxShadow:isCurrent?'0 0 15px rgba(0,255,148,0.25)':'none',
+                minWidth:90,
               }}>
-                <div style={{ fontSize: 10, fontFamily: 'var(--font-ui)', color: teamColor(p.id), marginBottom: 2 }}>{p.nickname}</div>
-                <div style={{ fontSize: 10, color: 'var(--text-dim)' }}>🃏 ×{handSize}</div>
+                <div style={{ fontSize:10.5, fontFamily:'var(--font-ui)', color:isCurrent?'var(--green)':'var(--text)', marginBottom:2 }}>
+                  {p.nickname}
+                  {isAtt && <span style={{ color:'var(--gold)', fontSize:8 }}> ⚔</span>}
+                  {isDef && <span style={{ color:'var(--cyan)', fontSize:8 }}> 🛡</span>}
+                </div>
+                <div style={{ display:'flex', gap:2, justifyContent:'center', alignItems:'center' }}>
+                  <span style={{ fontSize:9, color:'var(--dim)' }}>🃏×{hSize}</span>
+                  <span style={{ fontSize:9, color: pPen>=9?'var(--red)':'var(--dim)' }}>⚡{pPen}</span>
+                </div>
               </div>
               {/* Face-down cards */}
-              <div style={{ display: 'flex', gap: -8 }}>
-                {Array.from({ length: Math.min(handSize, 5) }).map((_, ci) => (
+              <div style={{ display:'flex' }}>
+                {Array.from({length:Math.min(hSize,6)}).map((_,ci) => (
                   <div key={ci} style={{
-                    width: 28, height: 40, borderRadius: 4,
-                    background: 'linear-gradient(135deg, #0a1535 0%, #1a2a5e 100%)',
-                    border: '1px solid rgba(0,245,255,0.2)',
-                    marginLeft: ci > 0 ? -12 : 0, zIndex: ci,
-                  }} />
+                    width:24, height:36, borderRadius:4, marginLeft:ci>0?-10:0, zIndex:ci,
+                    background:'linear-gradient(135deg,#0a1a3a,#152040)',
+                    border:'1px solid rgba(0,229,255,0.2)',
+                  }}/>
                 ))}
               </div>
             </div>
           );
         })}
 
-        {/* Current trick on table */}
-        <div style={{ position: 'absolute', display: 'flex', gap: 8, zIndex: 6, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 320 }}>
-          <AnimatePresence>
-            {(gameState?.currentTrick || []).map((t, i) => {
-              const player = players.find(p => p.id === t.playerId);
-              return (
-                <motion.div key={t.card.id}
-                  initial={{ scale: 0, rotate: -10 }}
-                  animate={{ scale: 1, rotate: (i % 2 === 0 ? -5 : 5) + (Math.random() * 6 - 3) }}
-                  style={{ position: 'relative' }}
-                >
-                  <CardUI card={t.card} small trump={t.card.suit === trumpSuit} />
-                  <div style={{
-                    position: 'absolute', bottom: -16, left: '50%', transform: 'translateX(-50%)',
-                    fontSize: 9, color: 'var(--text-dim)', whiteSpace: 'nowrap', fontFamily: 'var(--font-ui)',
-                  }}>{player?.nickname}</div>
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
+        {/* Trick area on table */}
+        <div style={{
+          position:'absolute', display:'flex', gap:8, zIndex:6,
+          flexWrap:'wrap', justifyContent:'center', maxWidth:320,
+        }}>
+          {/* Attack cards */}
+          <div style={{ display:'flex', gap:4, alignItems:'flex-start' }}>
+            <AnimatePresence>
+              {(gs?.attackCards||[]).map((c, i) => {
+                const defended = gs?.defendCards?.[i];
+                return (
+                  <motion.div key={c.id} initial={{scale:0,rotate:-15}} animate={{scale:1,rotate:(i%2===0?-6:6)}}
+                    style={{ position:'relative' }}
+                  >
+                    <Card card={c} small trump={c.suit===trump}/>
+                    {defended && (
+                      <motion.div initial={{scale:0,rotate:0}} animate={{scale:1,rotate:12}}
+                        style={{ position:'absolute', top:-4, left:4, zIndex:1 }}
+                      >
+                        <Card card={defended} small trump={defended.suit===trump}/>
+                      </motion.div>
+                    )}
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </div>
         </div>
 
-        {/* Trump card display */}
-        {gameState?.trumpCard && gameState?.deckRemaining > 0 && (
-          <div style={{ position: 'absolute', right: '5%', top: '50%', transform: 'translateY(-50%)', zIndex: 5 }}>
-            <div style={{ fontSize: 9, color: 'var(--neon-gold)', fontFamily: 'var(--font-ui)', textAlign: 'center', marginBottom: 4 }}>
-              KOZIR KARTI
-            </div>
-            <CardUI card={gameState.trumpCard} small trump />
-            <div style={{ fontSize: 9, color: 'var(--text-dim)', fontFamily: 'var(--font-ui)', textAlign: 'center', marginTop: 4 }}>
-              {gameState.deckRemaining} qoldi
-            </div>
+        {/* Trump card (deck indicator) */}
+        {gs?.trumpCard && gs?.deckRemaining > 0 && (
+          <div style={{ position:'absolute', right:'4%', top:'50%', transform:'translateY(-50%)', zIndex:5, textAlign:'center' }}>
+            <div style={{ fontSize:9, color:'var(--gold)', fontFamily:'var(--font-ui)', marginBottom:4 }}>KOZIR KARTI</div>
+            <Card card={gs.trumpCard} small trump/>
+            <div style={{ fontSize:9, color:'var(--dim)', fontFamily:'var(--font-ui)', marginTop:3 }}>{gs.deckRemaining} karta</div>
           </div>
         )}
 
-        {/* Turn indicator */}
-        {isMyTurn && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            style={{
-              position: 'absolute', top: '10%', left: '50%', transform: 'translateX(-50%)',
-              padding: '8px 20px', borderRadius: 20,
-              background: 'rgba(0,255,136,0.15)', border: '1px solid var(--neon-green)',
-              color: 'var(--neon-green)', fontFamily: 'var(--font-ui)', fontSize: 12,
-              boxShadow: '0 0 20px rgba(0,255,136,0.3)',
-              zIndex: 10,
-            }}
-          >
-            SIZNING NAVBATИНГИZ
-          </motion.div>
-        )}
+        {/* Role / Turn indicator */}
+        <div style={{ position:'absolute', top:10, left:'50%', transform:'translateX(-50%)', zIndex:10 }}>
+          <AnimatePresence>
+            {isMyTurn && (
+              <motion.div initial={{opacity:0,scale:.8}} animate={{opacity:1,scale:1}} exit={{opacity:0,scale:.8}}
+                style={{
+                  padding:'7px 18px', borderRadius:20,
+                  background: isAttacker?'rgba(245,200,66,0.15)':'rgba(0,229,255,0.12)',
+                  border:`1px solid ${isAttacker?'var(--gold)':'var(--cyan)'}`,
+                  color: isAttacker?'var(--gold)':'var(--cyan)',
+                  fontFamily:'var(--font-ui)', fontSize:11,
+                  boxShadow:`0 0 18px ${isAttacker?'rgba(245,200,66,0.3)':'rgba(0,229,255,0.25)'}`,
+                }}
+              >
+                {isAttacker ? '⚔ HUJUM QILING' : '🛡 HIMOYA QILING'}
+              </motion.div>
+            )}
+            {!isMyTurn && gs?.currentPlayer && (
+              <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
+                style={{
+                  padding:'6px 14px', borderRadius:20,
+                  background:'rgba(255,255,255,0.04)',
+                  border:'1px solid rgba(255,255,255,0.08)',
+                  color:'var(--dim)', fontFamily:'var(--font-ui)', fontSize:10,
+                }}
+              >
+                {players.find(p=>p.id===gs.currentPlayer)?.nickname} o'ynamoqda...
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Bura rules reminder */}
+        <div style={{
+          position:'absolute', left:'2%', top:'50%', transform:'translateY(-50%)',
+          zIndex:5, display:'flex', flexDirection:'column', gap:3,
+        }}>
+          {[['A','11'], ['10','10'], ['K','4'], ['Q','3'], ['J','2']].map(([r,v]) => (
+            <div key={r} style={{
+              display:'flex', gap:4, alignItems:'center',
+              padding:'2px 6px', borderRadius:4,
+              background:'rgba(255,255,255,0.03)',
+            }}>
+              <span style={{ fontFamily:'var(--font-ui)', fontSize:9, color:'var(--dim)', fontWeight:700 }}>{r}</span>
+              <span style={{ fontFamily:'var(--font-ui)', fontSize:8, color:'var(--dimmer)' }}>=</span>
+              <span style={{ fontFamily:'var(--font-ui)', fontSize:8.5, color:'var(--gold)' }}>{v}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* My hand */}
+      {/* MY HAND AREA */}
       <div style={{
-        padding: '12px 8px 20px',
-        background: 'rgba(3,5,16,0.85)', backdropFilter: 'blur(10px)',
-        borderTop: '1px solid rgba(0,245,255,0.08)',
-        zIndex: 10,
+        background:'rgba(2,4,8,0.88)', backdropFilter:'blur(14px)',
+        borderTop:'1px solid rgba(0,229,255,0.07)',
+        padding:'10px 8px 18px', zIndex:10,
       }}>
-        {/* My info */}
-        <div style={{ textAlign: 'center', marginBottom: 8 }}>
-          <span style={{
-            fontFamily: 'var(--font-ui)', fontSize: 11,
-            color: isMyTurn ? 'var(--neon-green)' : 'var(--text-dim)',
+        {/* My info bar */}
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:12, marginBottom:8 }}>
+          <span style={{ fontFamily:'var(--font-ui)', fontSize:10,
+            color: isMyTurn?(isAttacker?'var(--gold)':'var(--cyan)'):'var(--dim)',
           }}>
-            {nickname} {isMyTurn ? '• SIZNING NAVBATINGIZ' : '• KUTMOQDA...'}
+            {nickname}
+            {isAttacker ? ' • ⚔ HUJUMCHI' : isDefender ? ' • 🛡 HIMOYACHI' : ''}
+          </span>
+          <span style={{ fontFamily:'var(--font-ui)', fontSize:9, color:'var(--dim)' }}>
+            BALL: <span style={{ color:'var(--text)' }}>{myScore}</span>
+          </span>
+          <span style={{ fontFamily:'var(--font-ui)', fontSize:9, color: myPenalty>=9?'var(--red)':'var(--dim)' }}>
+            JARIMA: <span style={{ color:myPenalty>=9?'var(--red)':'var(--text)' }}>{myPenalty}</span>/12
           </span>
         </div>
 
-        {/* Hand */}
+        {/* Cards */}
         <div style={{
-          display: 'flex', gap: 4, justifyContent: 'center',
-          flexWrap: 'nowrap', overflowX: 'auto', paddingBottom: 4,
-          paddingTop: 20,
+          display:'flex', gap:4, justifyContent:'center',
+          flexWrap:'nowrap', overflowX:'auto',
+          paddingTop:18, paddingBottom:4,
         }}>
           <AnimatePresence>
-            {(myHand || []).map((card, i) => (
-              <div key={card.id} style={{ position: 'relative' }}>
-                <CardUI
-                  card={card}
-                  onClick={handleCardClick}
-                  selected={selectedCard?.id === card.id}
-                  playable={playableCards.has(card.id) && isMyTurn}
-                  trump={card.suit === trumpSuit}
-                  animDelay={i * 0.06}
-                />
-              </div>
+            {(myHand||[]).map((c, i) => (
+              <Card
+                key={c.id} card={c}
+                onClick={handleCardClick}
+                selected={selected?.id === c.id}
+                playable={playable.has(c.id) && isMyTurn}
+                trump={c.suit===trump}
+                animDelay={i*0.05}
+                shake={shakeCard===c.id}
+              />
             ))}
           </AnimatePresence>
         </div>
 
-        {/* Play hint */}
-        {selectedCard && isMyTurn && (
-          <div style={{ textAlign: 'center', marginTop: 8 }}>
-            <NeonBtn small color="green" onClick={() => { SFX.cardPlay(); onPlayCard(selectedCard.id); setSelectedCard(null); }}>
-              ▶ {selectedCard.rank}{SUIT_SYMBOL[selectedCard.suit]} O'YNASH
-            </NeonBtn>
-          </div>
-        )}
+        {/* Action buttons */}
+        <div style={{ display:'flex', gap:8, justifyContent:'center', marginTop:10 }}>
+          {selected && isMyTurn && playable.has(selected.id) && (
+            <Btn small color={isAttacker?'gold':'cyan'} onClick={() => { SFX.play(); onPlay(selected.id); setSelected(null); }}>
+              ▶ {selected.rank}{SUIT_SYM[selected.suit]} O'YNASH
+            </Btn>
+          )}
+          {isDefender && isMyTurn && phase2 === 'defending' && (gs?.attackCards||[]).length > 0 && (
+            <Btn small color="red" onClick={handleThrow}>
+              ✕ TASHLAB YUBORISH
+            </Btn>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
-// ─── 108 GAME SCREEN ──────────────────────────────────────────────
-function Game108Screen({ room, gameState, myHand, socketId, nickname, onPlayCard, onDrawCard, onLeave, onPlayAgain }) {
-  const [selectedCard, setSelectedCard] = useState(null);
-  const [suitModal, setSuitModal] = useState(false);
-  const isMyTurn = gameState?.currentPlayer === socketId;
+// ─── BURA ROUND OVER ─────────────────────────────────────────────
+function BuraRoundOver({ gs, room, socketId, onNext, onLeave }) {
+  const isHost = room.host === socketId;
   const players = room.players;
+  const summary = gs?.roundSummary || {};
 
-  const topCard = gameState?.topCard;
-  const pendingDraw = gameState?.pendingDraw || 0;
-  const effectiveSuit = gameState?.suitRequest || gameState?.currentSuit;
+  useEffect(() => { SFX.reveal(); }, []);
 
-  // Validate which cards can be played
-  const playableCards = useMemo(() => {
-    if (!isMyTurn || !myHand) return new Set();
-    return new Set(myHand.filter(card => {
-      if (pendingDraw > 0) {
-        return card.rank === '6' || card.rank === '7' || (card.rank === 'K' && card.suit === 'spades');
-      }
-      if (card.rank === '8') return card.suit === effectiveSuit;
-      return card.suit === effectiveSuit || card.rank === gameState?.currentRank;
+  return (
+    <div style={{ position:'fixed', inset:0, display:'flex', alignItems:'center', justifyContent:'center', zIndex:100 }}>
+      <BG/>
+      <motion.div initial={{scale:.7,opacity:0}} animate={{scale:1,opacity:1}} transition={{type:'spring',stiffness:120}}
+        style={{
+          background:'rgba(8,16,34,0.97)', borderRadius:22,
+          padding:'40px 36px', maxWidth:440, width:'90%',
+          border:'1px solid rgba(0,229,255,0.2)',
+          boxShadow:'0 0 60px rgba(0,229,255,0.08), 0 40px 80px rgba(0,0,0,0.6)',
+          textAlign:'center', zIndex:1,
+        }}
+      >
+        <div style={{ fontSize:52, marginBottom:14 }}>📊</div>
+        <h2 style={{ fontFamily:'var(--font-d)', fontSize:20, color:'var(--cyan)', textShadow:'0 0 12px var(--cyan)', marginBottom:6 }}>
+          RAUND YAKUNLANDI
+        </h2>
+        <p style={{ color:'var(--dim)', fontFamily:'var(--font-ui)', fontSize:10, marginBottom:24 }}>
+          RAUND #{gs?.roundNumber||1}
+        </p>
+
+        {/* Penalty explanation */}
+        <div style={{ marginBottom:20, padding:'12px 16px', borderRadius:10, background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.06)' }}>
+          <div style={{ fontFamily:'var(--font-ui)', fontSize:9, color:'var(--dim)', marginBottom:8, letterSpacing:'.1em' }}>JARIMA QOIDASI</div>
+          <div style={{ display:'flex', gap:6, justifyContent:'center', flexWrap:'wrap' }}>
+            {[['61-120','0 shtraf','green'],['32-60','2 shtraf','cyan'],['1-31','4 shtraf','gold'],['0','6 shtraf','red']].map(([r,l,c]) => (
+              <div key={r} style={{ padding:'4px 8px', borderRadius:4, background:`rgba(255,255,255,0.03)`, border:`1px solid rgba(255,255,255,0.07)`, fontSize:9, fontFamily:'var(--font-ui)', color:`var(--${c})` }}>
+                {r}: {l}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Results */}
+        <div style={{ display:'flex', flexDirection:'column', gap:8, marginBottom:26 }}>
+          {players.map(p => {
+            const s = summary[p.id] || {};
+            return (
+              <div key={p.id} style={{
+                display:'flex', justifyContent:'space-between', alignItems:'center',
+                padding:'12px 16px', borderRadius:10,
+                background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)',
+              }}>
+                <div>
+                  <div style={{ fontFamily:'var(--font-ui)', fontSize:12, color:'var(--text)' }}>{p.nickname}</div>
+                  <div style={{ fontFamily:'var(--font-ui)', fontSize:9, color:'var(--dim)', marginTop:2 }}>
+                    Jami jarima: <span style={{ color:(gs?.penalties?.[p.id]||0)>=9?'var(--red)':'var(--text)' }}>{gs?.penalties?.[p.id]||0}</span>/12
+                  </div>
+                </div>
+                <div style={{ textAlign:'right' }}>
+                  <div style={{ fontFamily:'var(--font-ui)', fontSize:16, fontWeight:700, color:'var(--gold)' }}>{s.points||0} ball</div>
+                  <div style={{ fontFamily:'var(--font-ui)', fontSize:11, color: s.penalty===0?'var(--green)':s.penalty===6?'var(--red)':'var(--pink)' }}>
+                    +{s.penalty||0} shtraf
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div style={{ display:'flex', gap:10, justifyContent:'center' }}>
+          {isHost && <Btn color="gold" onClick={onNext}>▶ KEYINGI RAUND</Btn>}
+          <Btn color="cyan" onClick={onLeave}>← MENU</Btn>
+        </div>
+        {!isHost && (
+          <p style={{ color:'var(--dim)', fontSize:10, marginTop:14, fontFamily:'var(--font-ui)' }}>
+            Host keyingi raundni boshlashini kuting...
+          </p>
+        )}
+      </motion.div>
+    </div>
+  );
+}
+
+// ─── BURA GAME OVER ──────────────────────────────────────────────
+function BuraGameOver({ gs, room, socketId, onPlayAgain, onLeave }) {
+  const isHost  = room.host === socketId;
+  const players = room.players;
+  const winner  = gs?.winner;
+  const isTeam  = room.gameType === '4p';
+
+  let iWon = false;
+  if (isTeam) {
+    const myTeam = gs?.teams?.team1?.includes(socketId) ? 'team1' : 'team2';
+    iWon = winner === myTeam;
+  } else {
+    iWon = winner === socketId;
+  }
+
+  useEffect(() => { if (iWon) SFX.win(); else SFX.error(); }, []);
+
+  const sorted = [...players].sort((a,b) => (gs?.penalties?.[a.id]||0) - (gs?.penalties?.[b.id]||0));
+
+  return (
+    <div style={{ position:'fixed', inset:0, display:'flex', alignItems:'center', justifyContent:'center', zIndex:100 }}>
+      <BG/>
+      <motion.div initial={{scale:.7,opacity:0}} animate={{scale:1,opacity:1}} transition={{type:'spring',stiffness:100}}
+        style={{
+          background:'rgba(8,16,34,0.97)', borderRadius:22,
+          padding:'44px 38px', maxWidth:440, width:'90%',
+          border:`1px solid ${iWon?'rgba(245,200,66,0.35)':'rgba(255,45,110,0.25)'}`,
+          boxShadow:`0 0 80px ${iWon?'rgba(245,200,66,0.1)':'rgba(255,45,110,0.07)'}, 0 40px 80px rgba(0,0,0,0.7)`,
+          textAlign:'center', zIndex:1,
+          animation: iWon?'winner-flash 2s infinite':undefined,
+        }}
+      >
+        <div style={{ fontSize:64, marginBottom:16 }}>{iWon?'🏆':'💀'}</div>
+        <h2 style={{
+          fontFamily:'var(--font-d)', fontSize:22,
+          color:iWon?'var(--gold)':'var(--pink)',
+          textShadow:`0 0 15px ${iWon?'var(--gold)':'var(--pink)'}`,
+          marginBottom:8,
+        }}>
+          {iWon ? "G'ALABA!" : "YUTQAZDINGIZ"}
+        </h2>
+        <p style={{ color:'var(--dim)', fontSize:13, marginBottom:28 }}>
+          {isTeam
+            ? (iWon ? 'Sizning jamoangiz g\'alaba qildi!' : 'Raqib jamoa g\'alaba qildi')
+            : (iWon ? 'Tabriklaymiz! Siz eng kam jarima yigʻdingiz!' : `${gs?.winnerNickname || players.find(p=>p.id===winner)?.nickname} gʻalaba qildi!`)}
+        </p>
+
+        {/* Final standings */}
+        <div style={{ display:'flex', flexDirection:'column', gap:8, marginBottom:28 }}>
+          {sorted.map((p, rank) => {
+            const pen = gs?.penalties?.[p.id] || 0;
+            const isLoser = pen >= 12;
+            return (
+              <div key={p.id} style={{
+                display:'flex', justifyContent:'space-between', alignItems:'center',
+                padding:'12px 16px', borderRadius:10,
+                background: rank===0?'rgba(245,200,66,0.08)':'rgba(255,255,255,0.03)',
+                border: `1px solid ${rank===0?'rgba(245,200,66,0.3)':isLoser?'rgba(255,45,110,0.3)':'rgba(255,255,255,0.07)'}`,
+              }}>
+                <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                  <span style={{ fontFamily:'var(--font-ui)', fontSize:14, color:rank===0?'var(--gold)':isLoser?'var(--red)':'var(--dim)' }}>
+                    {rank===0?'🥇':rank===1?'🥈':rank===2?'🥉':'💀'}
+                  </span>
+                  <span style={{ fontFamily:'var(--font-ui)', fontSize:12, color:rank===0?'var(--gold)':'var(--text)' }}>{p.nickname}</span>
+                  {p.id===socketId && <span style={{ fontSize:9, color:'var(--cyan)' }}>(sen)</span>}
+                </div>
+                <span style={{ fontFamily:'var(--font-ui)', fontSize:14, fontWeight:700, color:isLoser?'var(--red)':rank===0?'var(--gold)':'var(--text)' }}>
+                  {pen} shtraf
+                </span>
+              </div>
+            );
+          })}
+        </div>
+
+        <div style={{ display:'flex', gap:10, justifyContent:'center' }}>
+          {isHost && <Btn color="gold" onClick={onPlayAgain}>🔄 QAYTA O'YNASH</Btn>}
+          <Btn color="cyan" onClick={onLeave}>← BOSH MENU</Btn>
+        </div>
+        {!isHost && <p style={{ color:'var(--dim)', fontSize:10, marginTop:14, fontFamily:'var(--font-ui)' }}>Host qayta boshlashini kuting...</p>}
+      </motion.div>
+    </div>
+  );
+}
+
+// ─── 108 GAME SCREEN ──────────────────────────────────────────────
+function Game108Screen({ room, gs, myHand, socketId, nickname, onPlay, onDraw, onLeave, onPlayAgain }) {
+  const [selected, setSelected] = useState(null);
+  const [suitModal, setSuitModal] = useState(false);
+  const players     = room.players;
+  const isMyTurn    = gs?.currentPlayer === socketId;
+  const topCard     = gs?.topCard;
+  const pending     = gs?.pendingDraw || 0;
+  const effSuit     = gs?.suitRequest || gs?.currentSuit;
+
+  const playable = useMemo(() => {
+    if (!isMyTurn || !myHand || !gs) return new Set();
+    return new Set(myHand.filter(c => {
+      if (pending > 0) return c.rank==='6' || c.rank==='7' || (c.rank==='K'&&c.suit==='spades');
+      if (c.rank==='8') return c.suit === effSuit;
+      return c.suit === effSuit || c.rank === gs.currentRank;
     }).map(c => c.id));
-  }, [isMyTurn, myHand, pendingDraw, effectiveSuit, gameState?.currentRank]);
+  }, [isMyTurn, myHand, pending, effSuit, gs]);
 
-  const canDraw = isMyTurn;
-
-  function handleCardClick(card) {
-    if (!isMyTurn || !playableCards.has(card.id)) return;
-    if (card.rank === 'Q') {
-      setSelectedCard(card);
-      setSuitModal(true);
-    } else {
-      SFX.cardPlay();
-      onPlayCard(card.id, null);
-    }
+  function handleCardClick(c) {
+    if (!isMyTurn || !playable.has(c.id)) return;
+    if (c.rank === 'Q') { setSelected(c); setSuitModal(true); }
+    else { SFX.play(); onPlay(c.id, null); }
   }
 
-  function handleSuitSelect(suit) {
-    SFX.cardPlay();
-    onPlayCard(selectedCard.id, suit);
-    setSuitModal(false);
-    setSelectedCard(null);
-  }
-
-  if (gameState?.phase === 'gameOver') {
-    return <GameOverScreen gameState={gameState} room={room} socketId={socketId} onPlayAgain={onPlayAgain} onLeave={onLeave} mode="108" />;
+  if (gs?.phase === 'gameOver') {
+    const iWon = gs.winner === socketId;
+    return (
+      <div style={{ position:'fixed', inset:0, display:'flex', alignItems:'center', justifyContent:'center', zIndex:100 }}>
+        <BG/>
+        <motion.div initial={{scale:.7,opacity:0}} animate={{scale:1,opacity:1}} transition={{type:'spring',stiffness:120}}
+          style={{ background:'rgba(8,16,34,0.97)', borderRadius:22, padding:'44px 38px', maxWidth:400, width:'90%', border:`1px solid ${iWon?'rgba(0,255,148,0.35)':'rgba(255,45,110,0.25)'}`, boxShadow:'0 40px 80px rgba(0,0,0,0.7)', textAlign:'center', zIndex:1 }}>
+          <div style={{ fontSize:64, marginBottom:16 }}>{iWon?'🏆':'💀'}</div>
+          <h2 style={{ fontFamily:'var(--font-d)', fontSize:22, color:iWon?'var(--green)':'var(--pink)', textShadow:`0 0 14px ${iWon?'var(--green)':'var(--pink)'}`, marginBottom:8 }}>
+            {iWon?'G\'ALABA!':'YUTQAZDINGIZ'}
+          </h2>
+          <p style={{ color:'var(--dim)', marginBottom:28 }}>
+            {gs.winnerNickname} barcha kartasidan qutulib gʻalaba qildi!
+          </p>
+          <div style={{ marginBottom:20, display:'flex', flexDirection:'column', gap:8 }}>
+            {players.map(p => (
+              <div key={p.id} style={{ display:'flex', justifyContent:'space-between', padding:'10px 14px', borderRadius:8, background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)' }}>
+                <span style={{ fontFamily:'var(--font-ui)', fontSize:12, color:p.id===gs.winner?'var(--green)':'var(--text)' }}>{p.nickname}</span>
+                <span style={{ fontFamily:'var(--font-ui)', fontSize:12, color:'var(--dim)' }}>🃏 {gs.handSizes?.[p.id]||0} qoldi</span>
+              </div>
+            ))}
+          </div>
+          <div style={{ display:'flex', gap:10, justifyContent:'center' }}>
+            {room.host===socketId && <Btn color="green" onClick={onPlayAgain}>🔄 QAYTA</Btn>}
+            <Btn color="cyan" onClick={onLeave}>← MENU</Btn>
+          </div>
+        </motion.div>
+      </div>
+    );
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', zIndex: 20, overflow: 'hidden' }}>
-      <ParticlesBG />
+    <div style={{ position:'fixed', inset:0, display:'flex', flexDirection:'column', zIndex:20, overflow:'hidden' }}>
+      <BG variant="game"/>
 
-      {/* Suit selection modal */}
+      {/* Suit modal */}
       <AnimatePresence>
         {suitModal && (
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            style={{
-              position: 'fixed', inset: 0, zIndex: 999,
-              background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}
+          <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
+            style={{ position:'fixed', inset:0, zIndex:999, background:'rgba(0,0,0,0.7)', backdropFilter:'blur(10px)', display:'flex', alignItems:'center', justifyContent:'center' }}
           >
-            <motion.div
-              initial={{ scale: 0.8, y: 30 }} animate={{ scale: 1, y: 0 }}
-              style={{
-                background: 'var(--bg-card)', borderRadius: 16,
-                padding: '32px', border: '1px solid rgba(0,245,255,0.3)',
-                boxShadow: '0 0 60px rgba(0,245,255,0.15)',
-                textAlign: 'center',
-              }}
+            <motion.div initial={{scale:.8,y:24}} animate={{scale:1,y:0}}
+              style={{ background:'var(--surface)', borderRadius:16, padding:'30px', border:'1px solid rgba(0,229,255,0.25)', textAlign:'center' }}
             >
-              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--neon-gold)', marginBottom: 24 }}>
-                SUIT TANLANG (QUEEN)
-              </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                {['spades', 'hearts', 'diamonds', 'clubs'].map(suit => (
-                  <motion.button key={suit} onClick={() => handleSuitSelect(suit)}
-                    whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+              <h3 style={{ fontFamily:'var(--font-d)', fontSize:16, color:'var(--gold)', marginBottom:20 }}>SUIT TANLANG (QUEEN)</h3>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+                {['spades','hearts','diamonds','clubs'].map(s => (
+                  <motion.button key={s} onClick={()=>{ SFX.play(); onPlay(selected.id,s); setSuitModal(false); setSelected(null); }}
+                    whileHover={{scale:1.06}} whileTap={{scale:.94}}
                     style={{
-                      padding: '18px 24px', borderRadius: 10,
-                      background: 'rgba(255,255,255,0.04)',
-                      border: `2px solid ${SUIT_COLOR[suit]}`,
-                      cursor: 'pointer', color: SUIT_COLOR[suit], fontSize: 28,
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                      padding:'16px 20px', borderRadius:10,
+                      background:'rgba(255,255,255,0.04)', border:`2px solid ${SUIT_CLR[s]}`,
+                      cursor:'pointer', color:SUIT_CLR[s], fontSize:26,
+                      display:'flex', flexDirection:'column', alignItems:'center', gap:4,
                     }}
                   >
-                    <span>{SUIT_SYMBOL[suit]}</span>
-                    <span style={{ fontSize: 11, fontFamily: 'var(--font-ui)' }}>{SUIT_LABEL[suit]}</span>
+                    <span>{SUIT_SYM[s]}</span>
+                    <span style={{ fontSize:10, fontFamily:'var(--font-ui)' }}>{SUIT_LBL[s]}</span>
                   </motion.button>
                 ))}
               </div>
@@ -1330,153 +1456,94 @@ function Game108Screen({ room, gameState, myHand, socketId, nickname, onPlayCard
         )}
       </AnimatePresence>
 
-      {/* Top bar */}
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '10px 16px', zIndex: 10,
-        background: 'rgba(3,5,16,0.85)', backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid rgba(0,245,255,0.08)',
-      }}>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+      {/* TOP BAR */}
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'8px 14px', zIndex:10, background:'rgba(2,4,8,0.82)', backdropFilter:'blur(12px)', borderBottom:'1px solid rgba(0,229,255,0.07)' }}>
+        <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
           {players.map(p => {
-            const isCurrent = gameState?.currentPlayer === p.id;
-            const isMe = p.id === socketId;
+            const isCurrent = gs?.currentPlayer === p.id;
             return (
               <div key={p.id} style={{
-                padding: '4px 10px', borderRadius: 6,
-                background: isCurrent ? 'rgba(0,255,136,0.12)' : 'rgba(255,255,255,0.03)',
-                border: `1px solid ${isCurrent ? 'var(--neon-green)' : 'rgba(255,255,255,0.08)'}`,
-                fontFamily: 'var(--font-ui)', fontSize: 11,
-                color: isCurrent ? 'var(--neon-green)' : isMe ? 'var(--neon-cyan)' : 'var(--text-dim)',
+                padding:'4px 9px', borderRadius:5,
+                background:isCurrent?'rgba(0,255,148,0.1)':'rgba(255,255,255,0.03)',
+                border:`1px solid ${isCurrent?'var(--green)':'rgba(255,255,255,0.07)'}`,
+                fontFamily:'var(--font-ui)', fontSize:10,
+                color:isCurrent?'var(--green)':p.id===socketId?'var(--cyan)':'var(--dim)',
               }}>
-                {p.nickname} 🃏{gameState?.handSizes?.[p.id] || 0}
+                {p.nickname.slice(0,8)} 🃏{gs?.handSizes?.[p.id]||0}
               </div>
             );
           })}
         </div>
-        <NeonBtn small danger onClick={onLeave}>CHIQISH</NeonBtn>
+        <Btn small color="red" onClick={onLeave}>✕</Btn>
       </div>
 
-      {/* Game area */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', zIndex: 1 }}>
-
+      {/* GAME AREA */}
+      <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', position:'relative', zIndex:1 }}>
         {/* Direction */}
-        <div style={{
-          position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)',
-          fontFamily: 'var(--font-ui)', fontSize: 12, color: 'var(--neon-cyan)',
-        }}>
-          {gameState?.direction === 1 ? '↻ SOAT YO\'NALISHI' : '↺ TESKARI'}
+        <div style={{ marginBottom:12, fontFamily:'var(--font-ui)', fontSize:11, color:'var(--cyan)' }}>
+          {gs?.direction===1?'↻ Soat yo\'nalishi':'↺ Teskari yo\'nalish'}
         </div>
-
         {/* Pending draw warning */}
-        {pendingDraw > 0 && (
-          <motion.div
-            animate={{ scale: [1, 1.05, 1] }}
-            transition={{ repeat: Infinity, duration: 0.8 }}
+        {pending > 0 && (
+          <motion.div animate={{scale:[1,1.06,1]}} transition={{repeat:Infinity,duration:.7}}
             style={{
-              position: 'absolute', top: 36, left: '50%', transform: 'translateX(-50%)',
-              padding: '8px 20px', borderRadius: 20,
-              background: 'rgba(255,0,110,0.15)', border: '1px solid var(--neon-pink)',
-              color: 'var(--neon-pink)', fontFamily: 'var(--font-ui)', fontSize: 13,
-              boxShadow: '0 0 20px rgba(255,0,110,0.3)',
+              marginBottom:12, padding:'7px 18px', borderRadius:20,
+              background:'rgba(255,45,110,0.15)', border:'1px solid var(--pink)',
+              color:'var(--pink)', fontFamily:'var(--font-ui)', fontSize:12,
+              boxShadow:'0 0 18px rgba(255,45,110,0.3)',
             }}
-          >
-            ⚠ +{pendingDraw} KARTA
-          </motion.div>
+          >⚠ +{pending} KARTA OLISH KERAK</motion.div>
         )}
-
         {/* Deck + Discard */}
-        <div style={{ display: 'flex', gap: 40, alignItems: 'center' }}>
+        <div style={{ display:'flex', gap:36, alignItems:'center' }}>
           {/* Draw pile */}
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 10, color: 'var(--text-dim)', fontFamily: 'var(--font-ui)', marginBottom: 6 }}>
-              DAST ({gameState?.drawPileCount || 0})
+          <div style={{ textAlign:'center' }}>
+            <div style={{ fontSize:9, color:'var(--dim)', fontFamily:'var(--font-ui)', marginBottom:6 }}>
+              DAST ({gs?.drawPileCount||0})
             </div>
-            <motion.div
-              whileHover={canDraw ? { scale: 1.05 } : {}}
-              whileTap={canDraw ? { scale: 0.95 } : {}}
-              onClick={() => { if (canDraw) { SFX.cardDraw(); onDrawCard(); } }}
-              style={{ cursor: canDraw ? 'pointer' : 'default' }}
-            >
-              <CardUI faceDown />
+            <motion.div whileHover={isMyTurn?{scale:1.06}:{}} whileTap={isMyTurn?{scale:.94}:{}} onClick={isMyTurn?()=>{SFX.draw();onDraw();}:undefined} style={{ cursor:isMyTurn?'pointer':'default' }}>
+              <Card faceDown/>
             </motion.div>
-            {canDraw && (
-              <div style={{ marginTop: 6 }}>
-                <NeonBtn small color="cyan" onClick={() => { SFX.cardDraw(); onDrawCard(); }}>
-                  {pendingDraw > 0 ? `+${pendingDraw} OLISH` : 'KARTA OLISH'}
-                </NeonBtn>
+            {isMyTurn && (
+              <div style={{ marginTop:8 }}>
+                <Btn small color="cyan" onClick={()=>{SFX.draw();onDraw();}}>
+                  {pending>0?`+${pending} KARTA AL`:'KARTA OLISH'}
+                </Btn>
               </div>
             )}
           </div>
-
-          {/* Discard pile */}
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 10, color: 'var(--text-dim)', fontFamily: 'var(--font-ui)', marginBottom: 6 }}>
-              TASHLANGAN {gameState?.suitRequest && `(${SUIT_LABEL[gameState.suitRequest]} ZAKAZ)`}
+          {/* Discard */}
+          <div style={{ textAlign:'center' }}>
+            <div style={{ fontSize:9, color:'var(--dim)', fontFamily:'var(--font-ui)', marginBottom:6 }}>
+              TASHLANGAN {gs?.suitRequest?`(${SUIT_LBL[gs.suitRequest]} ZAKAZ)`:''}
             </div>
             <AnimatePresence mode="wait">
               {topCard && (
-                <motion.div key={topCard.id}
-                  initial={{ scale: 0.8, rotate: -10 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                >
-                  <CardUI card={topCard} />
+                <motion.div key={topCard.id} initial={{scale:.8,rotate:-12}} animate={{scale:1,rotate:0}} exit={{scale:.8}}>
+                  <Card card={topCard}/>
                 </motion.div>
               )}
             </AnimatePresence>
-            {/* Effective suit indicator */}
-            {effectiveSuit && (
-              <div style={{
-                marginTop: 6, fontFamily: 'var(--font-ui)', fontSize: 18,
-                color: SUIT_COLOR[effectiveSuit],
-              }}>
-                {SUIT_SYMBOL[effectiveSuit]}
-              </div>
+            {effSuit && (
+              <div style={{ marginTop:6, fontSize:22, color:SUIT_CLR[effSuit] }}>{SUIT_SYM[effSuit]}</div>
             )}
           </div>
         </div>
-
-        {/* Turn indicator */}
         {isMyTurn && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            style={{
-              marginTop: 20, padding: '8px 20px', borderRadius: 20,
-              background: 'rgba(0,255,136,0.15)', border: '1px solid var(--neon-green)',
-              color: 'var(--neon-green)', fontFamily: 'var(--font-ui)', fontSize: 12,
-              boxShadow: '0 0 20px rgba(0,255,136,0.3)',
-            }}
-          >
+          <motion.div initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} style={{ marginTop:18, padding:'7px 18px', borderRadius:20, background:'rgba(0,255,148,0.12)', border:'1px solid var(--green)', color:'var(--green)', fontFamily:'var(--font-ui)', fontSize:11, boxShadow:'0 0 16px rgba(0,255,148,0.25)' }}>
             SIZNING NAVBATINGIZ
           </motion.div>
         )}
       </div>
 
-      {/* My hand */}
-      <div style={{
-        padding: '10px 6px 16px',
-        background: 'rgba(3,5,16,0.85)', backdropFilter: 'blur(10px)',
-        borderTop: '1px solid rgba(0,245,255,0.08)',
-        zIndex: 10,
-      }}>
-        <div style={{ textAlign: 'center', marginBottom: 6, fontFamily: 'var(--font-ui)', fontSize: 10, color: 'var(--text-dim)' }}>
-          {nickname} • {myHand?.length || 0} KARTA
+      {/* MY HAND */}
+      <div style={{ background:'rgba(2,4,8,0.88)', backdropFilter:'blur(14px)', borderTop:'1px solid rgba(0,229,255,0.07)', padding:'10px 6px 16px', zIndex:10 }}>
+        <div style={{ textAlign:'center', marginBottom:6, fontFamily:'var(--font-ui)', fontSize:9, color:'var(--dim)' }}>
+          {nickname} • {myHand?.length||0} karta
         </div>
-        <div style={{
-          display: 'flex', gap: 3, justifyContent: 'center',
-          flexWrap: 'nowrap', overflowX: 'auto',
-          paddingBottom: 4, paddingTop: 16,
-        }}>
-          {(myHand || []).map((card, i) => (
-            <CardUI
-              key={card.id}
-              card={card}
-              onClick={handleCardClick}
-              playable={playableCards.has(card.id) && isMyTurn}
-              animDelay={i * 0.05}
-              small
-            />
+        <div style={{ display:'flex', gap:3, justifyContent:'center', flexWrap:'nowrap', overflowX:'auto', paddingTop:14, paddingBottom:4 }}>
+          {(myHand||[]).map((c,i) => (
+            <Card key={c.id} card={c} onClick={handleCardClick} playable={playable.has(c.id)&&isMyTurn} animDelay={i*.04} small/>
           ))}
         </div>
       </div>
@@ -1484,483 +1551,200 @@ function Game108Screen({ room, gameState, myHand, socketId, nickname, onPlayCard
   );
 }
 
-// ─── GAME OVER SCREEN ─────────────────────────────────────────────
-function GameOverScreen({ gameState, room, socketId, onPlayAgain, onLeave, mode }) {
-  const isHost = room.host === socketId;
-  const winnerId = gameState?.winner;
-  const isTeam = mode === 'bura' && room.gameType === '4p';
-
-  let winnerLabel = '';
-  if (mode === 'bura' && isTeam) {
-    const myTeam = gameState?.teams?.team1?.includes(socketId) ? 'team1' : 'team2';
-    winnerLabel = winnerId === myTeam ? '🎉 SИЗNING JAMOANGI G\'ALABA QILDI!' : '😔 Raqiblar g\'alaba qildi';
-  } else if (mode === 'bura') {
-    winnerLabel = winnerId === socketId ? '🎉 SIZ G\'ALABA QILDINGIZ!' : '😔 ' + (room.players.find(p => p.id === winnerId)?.nickname || '') + ' g\'alaba qildi';
-  } else {
-    winnerLabel = winnerId === socketId ? '🎉 SIZ G\'ALABA QILDINGIZ!' : '😔 ' + (gameState?.winnerNickname || '') + ' g\'alaba qildi';
-  }
-
-  useEffect(() => {
-    if (winnerId === socketId || (isTeam && gameState?.teams?.team1?.includes(socketId) && winnerId === 'team1') || (isTeam && gameState?.teams?.team2?.includes(socketId) && winnerId === 'team2')) {
-      SFX.win();
-    }
-  }, []);
-
-  return (
-    <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
-      <ParticlesBG />
-      <motion.div
-        initial={{ scale: 0.7, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: 'spring', stiffness: 120 }}
-        style={{
-          background: 'rgba(7,13,32,0.97)', borderRadius: 24,
-          padding: '48px 40px', maxWidth: 420, width: '90%',
-          border: '1px solid rgba(255,215,0,0.3)',
-          boxShadow: '0 0 80px rgba(255,215,0,0.1), 0 40px 80px rgba(0,0,0,0.6)',
-          textAlign: 'center', zIndex: 1,
-        }}
-      >
-        <div style={{ fontSize: 64, marginBottom: 16 }}>
-          {winnerLabel.startsWith('🎉') ? '🏆' : '💀'}
-        </div>
-        <h2 style={{
-          fontFamily: 'var(--font-display)', fontSize: 22,
-          color: winnerLabel.startsWith('🎉') ? 'var(--neon-gold)' : 'var(--neon-pink)',
-          textShadow: `0 0 15px ${winnerLabel.startsWith('🎉') ? 'var(--neon-gold)' : 'var(--neon-pink)'}`,
-          marginBottom: 8,
-        }}>O'YIN TUGADI</h2>
-        <p style={{ color: 'var(--text-primary)', fontSize: 15, marginBottom: 32 }}>{winnerLabel}</p>
-
-        {/* Scores */}
-        {mode === 'bura' && (
-          <div style={{ marginBottom: 28, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {isTeam ? (
-              <>
-                <ScoreRow label="Jamoa 1" score={gameState?.teamScores?.team1} highlight={winnerId === 'team1'} color="var(--neon-cyan)" />
-                <ScoreRow label="Jamoa 2" score={gameState?.teamScores?.team2} highlight={winnerId === 'team2'} color="var(--neon-pink)" />
-              </>
-            ) : (
-              room.players.map(p => (
-                <ScoreRow key={p.id} label={p.nickname} score={gameState?.scores?.[p.id]} highlight={p.id === winnerId} color="var(--neon-cyan)" />
-              ))
-            )}
-          </div>
-        )}
-
-        <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-          {isHost && (
-            <NeonBtn color="gold" onClick={onPlayAgain}>🔄 QAYTA O'YNASH</NeonBtn>
-          )}
-          <NeonBtn color="cyan" onClick={onLeave}>← BOSH MENU</NeonBtn>
-        </div>
-        {!isHost && (
-          <p style={{ color: 'var(--text-dim)', fontSize: 11, marginTop: 16, fontFamily: 'var(--font-ui)' }}>
-            HOST qayta boshlashini kuting...
-          </p>
-        )}
-      </motion.div>
-    </div>
-  );
-}
-
-function ScoreRow({ label, score, highlight, color }) {
-  return (
-    <div style={{
-      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-      padding: '10px 16px', borderRadius: 8,
-      background: highlight ? `${color}15` : 'rgba(255,255,255,0.03)',
-      border: `1px solid ${highlight ? color : 'rgba(255,255,255,0.06)'}`,
-    }}>
-      <span style={{ color: highlight ? color : 'var(--text-dim)', fontFamily: 'var(--font-ui)', fontSize: 12 }}>{label}</span>
-      <span style={{ color: highlight ? color : 'var(--text-primary)', fontFamily: 'var(--font-ui)', fontSize: 16, fontWeight: 700 }}>{score || 0}</span>
-    </div>
-  );
-}
-
-// ─── MAIN APP COMPONENT ───────────────────────────────────────────
+// ─── MAIN APP ─────────────────────────────────────────────────────
 export default function App() {
-  // ── State ──
-  const [screen, setScreen] = useState('login');   // login | menu | select | lobby | bura | 108
+  const [screen,   setScreen]   = useState('login');
   const [nickname, setNickname] = useState('');
   const [socketId, setSocketId] = useState('');
-  const [selectedGame, setSelectedGame] = useState('');
-  const [room, setRoom] = useState(null);
-  const [gameState, setGameState] = useState(null);
-  const [myHand, setMyHand] = useState([]);
-  const [chatMessages, setChatMessages] = useState([]);
-  const [typingUsers, setTypingUsers] = useState([]);
-  const [toasts, setToasts] = useState([]);
-  const [connected, setConnected] = useState(false);
+  const [selGame,  setSelGame]  = useState('');
+  const [room,     setRoom]     = useState(null);
+  const [gs,       setGs]       = useState(null);
+  const [myHand,   setMyHand]   = useState([]);
+  const [chats,    setChats]    = useState([]);
+  const [typing,   setTyping]   = useState([]);
+  const [toasts,   setToasts]   = useState([]);
+  const [online,   setOnline]   = useState(false);
 
-  const socketRef = useRef(null);
-  const typingTimeouts = useRef({});
-  const toastId = useRef(0);
+  const sockRef  = useRef(null);
+  const tTyping  = useRef({});
+  const toastId  = useRef(0);
 
-  // ── Toast helper ──
-  const toast = useCallback((msg, type = 'info') => {
+  const toast = useCallback((msg, type='info') => {
     const id = ++toastId.current;
-    setToasts(p => [...p, { id, msg, type }]);
-    setTimeout(() => setToasts(p => p.filter(t => t.id !== id)), 3500);
+    setToasts(p => [...p, {id,msg,type}]);
+    setTimeout(() => setToasts(p => p.filter(t=>t.id!==id)), 3500);
   }, []);
 
-  // ── Socket setup ──
   useEffect(() => {
     const socket = getSocket();
-    socketRef.current = socket;
+    sockRef.current = socket;
 
     socket.on('connect', () => {
-      setConnected(true);
+      setOnline(true);
       setSocketId(socket.id);
-      // Auto-register if we have nickname
-      const saved = localStorage.getItem('karta_nickname');
-      if (saved) {
-        socket.emit('register', { nickname: saved });
-      }
+      const saved = localStorage.getItem('karta_nick');
+      if (saved) socket.emit('register', {nickname:saved});
     });
-
     socket.on('disconnect', () => {
-      setConnected(false);
-      toast('Server bilan aloqa uzildi. Qayta ulanmoqda...', 'error');
+      setOnline(false);
+      toast('Ulanish uzildi. Qayta ulanmoqda...', 'error');
     });
+    socket.on('registered', ({nickname:n}) => { setNickname(n); });
+    socket.on('error', ({msg}) => { toast(msg,'error'); SFX.error(); });
+    socket.on('moveError', ({msg}) => { toast(msg,'error'); SFX.error(); });
+    socket.on('joinError', ({msg}) => { toast(msg,'error'); SFX.error(); });
 
-    socket.on('registered', ({ nickname: n, socketId: sid }) => {
-      setNickname(n);
-      setSocketId(sid);
+    socket.on('roomCreated', ({room:r}) => {
+      setRoom(r); setChats(r.chat||[]); setScreen('lobby');
     });
-
-    socket.on('error', ({ msg }) => {
-      toast(msg, 'error');
-      SFX.error();
+    socket.on('roomJoined', ({room:r}) => {
+      setRoom(r); setChats(r.chat||[]); setScreen('lobby');
     });
-
-    socket.on('moveError', ({ msg }) => {
-      toast(msg, 'error');
-      SFX.error();
-    });
-
-    socket.on('joinError', ({ msg }) => {
-      toast(msg, 'error');
-      SFX.error();
-    });
-
-    socket.on('roomCreated', ({ roomId, room: r }) => {
-      setRoom(r);
-      setChatMessages(r.chat || []);
-      setScreen('lobby');
-    });
-
-    socket.on('roomJoined', ({ room: r }) => {
-      setRoom(r);
-      setChatMessages(r.chat || []);
-      setScreen('lobby');
-    });
-
-    socket.on('roomUpdate', ({ room: r }) => {
-      setRoom(r);
-    });
-
-    socket.on('playerJoined', ({ nickname: n }) => {
-      toast(`${n} xonaga qo'shildi!`, 'success');
-      SFX.join();
-    });
-
-    socket.on('playerLeft', ({ nickname: n, room: r }) => {
-      toast(`${n} chiqdi`, 'info');
+    socket.on('roomUpdate', ({room:r}) => setRoom(r));
+    socket.on('playerJoined', ({nickname:n}) => { toast(`${n} qoʻshildi!`,'success'); SFX.join(); });
+    socket.on('playerLeft', ({nickname:n, room:r}) => {
+      toast(`${n} chiqdi`,'info');
       if (r) setRoom(r);
     });
 
-    socket.on('playerReconnected', ({ nickname: n }) => {
-      toast(`${n} qaytib keldi`, 'success');
+    socket.on('gameStarted', ({room:r}) => {
+      setRoom(r); setMyHand([]); setGs(null); SFX.deal();
     });
-
-    socket.on('gameStarted', ({ room: r }) => {
-      setRoom(r);
-      setMyHand([]);
-      setGameState(null);
-      SFX.shuffle();
-    });
-
-    socket.on('dealCards', ({ hand }) => {
-      setMyHand(hand);
-    });
-
-    socket.on('handUpdate', ({ hand }) => {
-      setMyHand(hand);
-    });
+    socket.on('dealCards', ({hand}) => { setMyHand(hand); SFX.deal(); });
+    socket.on('handUpdate', ({hand}) => setMyHand(hand));
 
     socket.on('gameState', (state) => {
-      setGameState(state);
-      // Switch to game screen
+      setGs(state);
       setScreen(prev => {
-        if (prev === 'lobby') {
-          return state && room ? room.gameMode : prev;
-        }
+        if (prev==='lobby' && state) return roomRef.current?.gameMode || prev;
         return prev;
       });
     });
 
-    socket.on('trickComplete', ({ winner, points }) => {
-      // Find winner name
-      const winnerPlayer = room?.players?.find(p => p.id === winner);
-      if (winnerPlayer) {
-        toast(`${winnerPlayer.nickname} trick'ni oldi! +${points} ball`, 'info');
-      }
-    });
+    socket.on('roundOver', (state) => { setGs(state); });
+    socket.on('gameOver', (state) => { setGs(prev => ({...prev,...state,phase:'gameOver'})); });
 
-    socket.on('gameOver', (data) => {
-      setGameState(prev => ({ ...prev, ...data, phase: 'gameOver', roundOver: true }));
-    });
-
-    socket.on('gameCancelled', ({ reason, room: r }) => {
-      toast(reason, 'error');
-      setRoom(r);
-      setGameState(null);
-      setMyHand([]);
+    socket.on('gameCancelled', ({reason, room:r}) => {
+      toast(reason,'error');
+      if (r) setRoom(r);
+      setGs(null); setMyHand([]);
       setScreen('lobby');
     });
 
-    socket.on('returnToLobby', ({ room: r }) => {
+    socket.on('returnToLobby', ({room:r}) => {
+      setRoom(r); setGs(null); setMyHand([]); setScreen('lobby');
+    });
+
+    socket.on('chatMessage', m => setChats(p=>[...p,m]));
+    socket.on('typing', ({nickname:n}) => {
+      setTyping(p=>[...new Set([...p,n])]);
+      clearTimeout(tTyping.current[n]);
+      tTyping.current[n] = setTimeout(()=>setTyping(p=>p.filter(u=>u!==n)), 2000);
+    });
+
+    socket.on('reconnected', ({room:r, gameState:gs2}) => {
       setRoom(r);
-      setGameState(null);
-      setMyHand([]);
-      setScreen('lobby');
-    });
-
-    socket.on('chatMessage', (msg) => {
-      setChatMessages(prev => [...prev, msg]);
-    });
-
-    socket.on('typing', ({ nickname: n }) => {
-      setTypingUsers(prev => [...new Set([...prev, n])]);
-      clearTimeout(typingTimeouts.current[n]);
-      typingTimeouts.current[n] = setTimeout(() => {
-        setTypingUsers(prev => prev.filter(u => u !== n));
-      }, 2000);
-    });
-
-    socket.on('reconnected', ({ room: r, gameState: gs }) => {
-      setRoom(r);
-      if (gs?.hand) setMyHand(gs.hand);
-      if (gs?.public) setGameState(gs.public);
-      setChatMessages(r.chat || []);
-      if (r.status === 'playing') {
-        setScreen(r.gameMode);
-      } else {
-        setScreen('lobby');
-      }
-      toast('Xonaga qayta ulandi!', 'success');
+      if (gs2?.hand) setMyHand(gs2.hand);
+      if (gs2?.public) setGs(gs2.public);
+      setChats(r.chat||[]);
+      setScreen(r.status==='playing'?r.gameMode:'lobby');
+      toast('Xonaga qayta ulandi!','success');
     });
 
     socket.connect();
-
     return () => {
-      socket.off('connect');
-      socket.off('disconnect');
-      socket.off('registered');
-      socket.off('error');
-      socket.off('moveError');
-      socket.off('joinError');
-      socket.off('roomCreated');
-      socket.off('roomJoined');
-      socket.off('roomUpdate');
-      socket.off('playerJoined');
-      socket.off('playerLeft');
-      socket.off('playerReconnected');
-      socket.off('gameStarted');
-      socket.off('dealCards');
-      socket.off('handUpdate');
-      socket.off('gameState');
-      socket.off('trickComplete');
-      socket.off('gameOver');
-      socket.off('gameCancelled');
-      socket.off('returnToLobby');
-      socket.off('chatMessage');
-      socket.off('typing');
-      socket.off('reconnected');
+      ['connect','disconnect','registered','error','moveError','joinError',
+       'roomCreated','roomJoined','roomUpdate','playerJoined','playerLeft',
+       'gameStarted','dealCards','handUpdate','gameState','roundOver','gameOver',
+       'gameCancelled','returnToLobby','chatMessage','typing','reconnected'
+      ].forEach(ev => socket.off(ev));
     };
   }, []);
 
-  // ── Game screen sync ──
+  // Sync game screen
+  const roomRef = useRef(null);
+  useEffect(() => { roomRef.current = room; }, [room]);
   useEffect(() => {
-    if (gameState && room && screen === 'lobby') {
-      setScreen(room.gameMode);
-    }
-  }, [gameState, room]);
+    if (gs && room && screen==='lobby') setScreen(room.gameMode);
+  }, [gs]);
 
-  // ── Handlers ──
-  function handleLogin(n) {
-    const socket = socketRef.current;
+  // Handlers
+  function login(n) {
     setNickname(n);
-    socket.emit('register', { nickname: n });
+    sockRef.current.emit('register', {nickname:n});
     setScreen('menu');
   }
-
-  function handleLogout() {
-    localStorage.removeItem('karta_nickname');
+  function logout() {
+    localStorage.removeItem('karta_nick');
+    setNickname(''); setRoom(null); setGs(null); setMyHand([]);
     setScreen('login');
-    setNickname('');
-    setRoom(null);
-    setGameState(null);
-    setMyHand([]);
   }
-
-  function handleSelectGame(gameId) {
-    setSelectedGame(gameId);
-    setScreen('select');
+  function createRoom({gameMode,gameType,deckCount}) {
+    sockRef.current.emit('createRoom',{gameMode,gameType,deckCount});
   }
-
-  function handleCreateRoom({ gameMode, gameType, deckCount }) {
-    socketRef.current.emit('createRoom', { gameMode, gameType, deckCount });
+  function joinRoom(roomId) {
+    sockRef.current.emit('joinRoom',{roomId:roomId.trim()});
   }
-
-  function handleJoinRoom(roomId) {
-    socketRef.current.emit('joinRoom', { roomId: roomId.trim() });
-  }
-
-  function handleToggleReady() {
-    socketRef.current.emit('toggleReady', { roomId: room?.id });
-  }
-
-  function handleStartGame() {
-    socketRef.current.emit('startGame', { roomId: room?.id });
-  }
-
-  function handleLeave() {
-    if (room?.id) {
-      socketRef.current.emit('leaveRoom', { roomId: room.id });
-    }
-    setRoom(null);
-    setGameState(null);
-    setMyHand([]);
-    setChatMessages([]);
+  function leave() {
+    if (room?.id) sockRef.current.emit('leaveRoom',{roomId:room.id});
+    setRoom(null); setGs(null); setMyHand([]); setChats([]);
     setScreen('menu');
   }
+  function sendChat(text) { sockRef.current.emit('chatMessage',{roomId:room?.id,text}); }
+  function buraPlay(cardId) { sockRef.current.emit('buraPlayCard',{roomId:room?.id,cardId}); }
+  function buraThrow() { sockRef.current.emit('buraThrow',{roomId:room?.id}); }
+  function play108(cardId, suit) { sockRef.current.emit('108PlayCard',{roomId:room?.id,cardId,chosenSuit:suit}); }
+  function draw108() { sockRef.current.emit('108DrawCard',{roomId:room?.id}); }
+  function playAgain() { sockRef.current.emit('playAgain',{roomId:room?.id}); }
+  function nextRound() { sockRef.current.emit('playAgain',{roomId:room?.id}); }
 
-  function handleBuraPlay(cardId) {
-    socketRef.current.emit('buraPlayCard', { roomId: room?.id, cardId });
-  }
-
-  function handle108Play(cardId, chosenSuit) {
-    socketRef.current.emit('108PlayCard', { roomId: room?.id, cardId, chosenSuit });
-  }
-
-  function handle108Draw() {
-    socketRef.current.emit('108DrawCard', { roomId: room?.id });
-  }
-
-  function handlePlayAgain() {
-    socketRef.current.emit('playAgain', { roomId: room?.id });
-  }
-
-  function handleSendChat(text) {
-    socketRef.current.emit('chatMessage', { roomId: room?.id, text });
-  }
-
-  function handleTyping() {
-    socketRef.current.emit('typing', { roomId: room?.id });
-  }
-
-  // ── Render ──
   return (
-    <div style={{ width: '100%', height: '100%', position: 'fixed', inset: 0, overflow: 'hidden' }}>
-      {/* Connection indicator */}
+    <div style={{ width:'100%', height:'100%', position:'fixed', inset:0, overflow:'hidden' }}>
+      {/* Online indicator */}
       <div style={{
-        position: 'fixed', bottom: 12, left: 12, zIndex: 9999,
-        display: 'flex', alignItems: 'center', gap: 6,
-        padding: '4px 10px', borderRadius: 20,
-        background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)',
-        border: `1px solid ${connected ? 'rgba(0,255,136,0.3)' : 'rgba(255,0,110,0.3)'}`,
+        position:'fixed', bottom:10, left:10, zIndex:9999,
+        display:'flex', alignItems:'center', gap:5,
+        padding:'4px 9px', borderRadius:20,
+        background:'rgba(0,0,0,0.55)', backdropFilter:'blur(8px)',
+        border:`1px solid ${online?'rgba(0,255,148,0.25)':'rgba(255,45,110,0.25)'}`,
       }}>
-        <div style={{
-          width: 6, height: 6, borderRadius: '50%',
-          background: connected ? 'var(--neon-green)' : 'var(--neon-pink)',
-          boxShadow: `0 0 6px ${connected ? 'var(--neon-green)' : 'var(--neon-pink)'}`,
-        }} />
-        <span style={{ fontSize: 9, fontFamily: 'var(--font-ui)', color: 'var(--text-dim)', letterSpacing: '0.1em' }}>
-          {connected ? 'ONLINE' : 'OFFLINE'}
+        <div style={{ width:5, height:5, borderRadius:'50%', background:online?'var(--green)':'var(--pink)', boxShadow:`0 0 5px ${online?'var(--green)':'var(--pink)'}` }}/>
+        <span style={{ fontSize:8.5, fontFamily:'var(--font-ui)', color:'var(--dim)', letterSpacing:'.1em' }}>
+          {online?'ONLINE':'OFFLINE'}
         </span>
       </div>
 
-      {/* Toast notifications */}
-      <Toast toasts={toasts} />
+      <Toast toasts={toasts}/>
 
-      {/* Screens */}
       <AnimatePresence mode="wait">
-        {screen === 'login' && (
-          <motion.div key="login" style={{ position: 'fixed', inset: 0 }}
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <LoginScreen onLogin={handleLogin} />
+        {screen==='login' && (
+          <motion.div key="login" style={{position:'fixed',inset:0}} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
+            <LoginScreen onLogin={login}/>
           </motion.div>
         )}
-
-        {screen === 'menu' && (
-          <motion.div key="menu" style={{ position: 'fixed', inset: 0 }}
-            initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }}>
-            <MainMenu nickname={nickname} onSelectGame={handleSelectGame} onLogout={handleLogout} />
+        {screen==='menu' && (
+          <motion.div key="menu" style={{position:'fixed',inset:0}} initial={{opacity:0,x:30}} animate={{opacity:1,x:0}} exit={{opacity:0,x:-30}}>
+            <MenuScreen nickname={nickname} onSelect={id=>{setSelGame(id);setScreen('select');}} onLogout={logout}/>
           </motion.div>
         )}
-
-        {screen === 'select' && (
-          <motion.div key="select" style={{ position: 'fixed', inset: 0 }}
-            initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }}>
-            <GameSelectScreen
-              gameMode={selectedGame}
-              onBack={() => setScreen('menu')}
-              onCreate={handleCreateRoom}
-              onJoin={handleJoinRoom}
-            />
+        {screen==='select' && (
+          <motion.div key="sel" style={{position:'fixed',inset:0}} initial={{opacity:0,x:30}} animate={{opacity:1,x:0}} exit={{opacity:0,x:-30}}>
+            <SelectScreen gameMode={selGame} onBack={()=>setScreen('menu')} onCreate={createRoom} onJoin={joinRoom}/>
           </motion.div>
         )}
-
-        {screen === 'lobby' && room && (
-          <motion.div key="lobby" style={{ position: 'fixed', inset: 0 }}
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <LobbyScreen
-              room={room}
-              nickname={nickname}
-              socketId={socketId}
-              onStart={handleStartGame}
-              onLeave={handleLeave}
-              onToggleReady={handleToggleReady}
-              onSendChat={handleSendChat}
-              onTyping={handleTyping}
-              chatMessages={chatMessages}
-              typingUsers={typingUsers}
-            />
+        {screen==='lobby' && room && (
+          <motion.div key="lobby" style={{position:'fixed',inset:0}} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
+            <LobbyScreen room={room} nickname={nickname} socketId={socketId} onStart={()=>sockRef.current.emit('startGame',{roomId:room.id})} onLeave={leave} onToggleReady={()=>sockRef.current.emit('toggleReady',{roomId:room.id})} onSendChat={sendChat} chats={chats} typingUsers={typing}/>
           </motion.div>
         )}
-
-        {screen === 'bura' && room && (
-          <motion.div key="bura" style={{ position: 'fixed', inset: 0 }}
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <BuraGame
-              room={room}
-              gameState={gameState}
-              myHand={myHand}
-              socketId={socketId}
-              nickname={nickname}
-              onPlayCard={handleBuraPlay}
-              onLeave={handleLeave}
-              onPlayAgain={handlePlayAgain}
-            />
+        {screen==='bura' && room && (
+          <motion.div key="bura" style={{position:'fixed',inset:0}} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
+            <BuraScreen room={room} gs={gs} myHand={myHand} socketId={socketId} nickname={nickname} onPlay={buraPlay} onThrow={buraThrow} onLeave={leave} onPlayAgain={playAgain} onNextRound={nextRound}/>
           </motion.div>
         )}
-
-        {screen === '108' && room && (
-          <motion.div key="108" style={{ position: 'fixed', inset: 0 }}
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <Game108Screen
-              room={room}
-              gameState={gameState}
-              myHand={myHand}
-              socketId={socketId}
-              nickname={nickname}
-              onPlayCard={handle108Play}
-              onDrawCard={handle108Draw}
-              onLeave={handleLeave}
-              onPlayAgain={handlePlayAgain}
-            />
+        {screen==='108' && room && (
+          <motion.div key="108" style={{position:'fixed',inset:0}} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
+            <Game108Screen room={room} gs={gs} myHand={myHand} socketId={socketId} nickname={nickname} onPlay={play108} onDraw={draw108} onLeave={leave} onPlayAgain={playAgain}/>
           </motion.div>
         )}
       </AnimatePresence>
