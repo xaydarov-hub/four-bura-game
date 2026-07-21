@@ -1,12 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════
- *  KARTA O'YINI — ULTRA PREMIUM FRONTEND
- *  To'rt Bura (Kozel) + 108 — Real Multiplayer
- *  React + Socket.IO + Framer Motion
- * ═══════════════════════════════════════════════════════════════
- * 
- *  BU LOYIHA STEAM, APP STORE VA GOOGLE PLAY'GA
- *  CHIQARISHGA TAYYOR PROFESSIONAL MAHSULOT
+ *  KARTA O'YINI — ULTRA PREMIUM FRONTEND (FIXED)
  * ═══════════════════════════════════════════════════════════════
  */
 
@@ -106,7 +100,6 @@ const GLOBAL_STYLES = `
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Scrollbar Styling */
   ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: var(--deep); }
   ::-webkit-scrollbar-thumb { 
@@ -116,18 +109,15 @@ const GLOBAL_STYLES = `
   }
   ::-webkit-scrollbar-thumb:hover { background: var(--cyan2); }
 
-  /* Focus States */
   :focus-visible {
     outline: 2px solid var(--cyan);
     outline-offset: 2px;
   }
 
-  /* Input Styles */
   input, button {
     font-family: var(--font-b);
   }
 
-  /* Keyframe Animations */
   @keyframes bg-shift {
     0%, 100% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
@@ -244,7 +234,6 @@ const GLOBAL_STYLES = `
     to { clip-path: inset(0 0 0 0); }
   }
 
-  /* Utility Classes */
   .glass {
     background: rgba(11, 20, 37, 0.75);
     backdrop-filter: blur(24px) saturate(1.2);
@@ -308,7 +297,7 @@ if (typeof document !== 'undefined') {
   document.head.appendChild(styleElement);
 }
 
-// ─── SOCKET SINGLETON (THREAD-SAFE) ─────────────────────────────
+// ─── SOCKET SINGLETON ─────────────────────────────────────────────
 
 let socketInstance = null;
 let socketListeners = new Map();
@@ -330,7 +319,7 @@ function getSocketInstance() {
   return socketInstance;
 }
 
-// ─── CONSTANTS (IMMUTABLE) ──────────────────────────────────────
+// ─── CONSTANTS ──────────────────────────────────────────────────────
 
 const SUIT_SYM = Object.freeze({
   spades: '♠',
@@ -372,7 +361,7 @@ const POSITION_STYLES = Object.freeze({
   right: { position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', flexDirection: 'row-reverse' },
 });
 
-// ─── AUDIO ENGINE (PROFESSIONAL) ─────────────────────────────────
+// ─── AUDIO ENGINE ──────────────────────────────────────────────────
 
 class AudioEngine {
   constructor() {
@@ -442,7 +431,6 @@ class AudioEngine {
     });
   }
 
-  // Public Sound Effects
   playShuffle() {
     this._playSequence([220, 280, 340, 400, 460], [0.06, 0.06, 0.06, 0.06, 0.08], 'triangle', 0.15);
   }
@@ -465,29 +453,14 @@ class AudioEngine {
   }
 
   playWin() {
-    this._playSequence(
-      [523, 659, 784, 1047, 1319, 1568],
-      [0.15, 0.15, 0.15, 0.15, 0.2, 0.25],
-      'sine',
-      0.25
-    );
+    this._playSequence([523, 659, 784, 1047, 1319, 1568], [0.15, 0.15, 0.15, 0.15, 0.2, 0.25], 'sine', 0.25);
     setTimeout(() => {
-      this._playSequence(
-        [1568, 1319, 1047, 784, 659, 523],
-        [0.08, 0.08, 0.08, 0.08, 0.1, 0.15],
-        'sine',
-        0.15
-      );
+      this._playSequence([1568, 1319, 1047, 784, 659, 523], [0.08, 0.08, 0.08, 0.08, 0.1, 0.15], 'sine', 0.15);
     }, 1000);
   }
 
   playLose() {
-    this._playSequence(
-      [400, 350, 300, 250],
-      [0.15, 0.15, 0.15, 0.2],
-      'sawtooth',
-      0.2
-    );
+    this._playSequence([400, 350, 300, 250], [0.15, 0.15, 0.15, 0.2], 'sawtooth', 0.2);
   }
 
   playNotification() {
@@ -525,21 +498,11 @@ class AudioEngine {
   }
 
   playVictory() {
-    this._playSequence(
-      [523, 659, 784, 1047, 1319, 1568, 1760, 1976],
-      [0.1, 0.1, 0.1, 0.1, 0.12, 0.12, 0.15, 0.2],
-      'sine',
-      0.2
-    );
+    this._playSequence([523, 659, 784, 1047, 1319, 1568, 1760, 1976], [0.1, 0.1, 0.1, 0.1, 0.12, 0.12, 0.15, 0.2], 'sine', 0.2);
   }
 
   playCombination() {
-    this._playSequence(
-      [440, 554, 659, 880, 1109, 1319],
-      [0.08, 0.08, 0.08, 0.08, 0.1, 0.15],
-      'sine',
-      0.22
-    );
+    this._playSequence([440, 554, 659, 880, 1109, 1319], [0.08, 0.08, 0.08, 0.08, 0.1, 0.15], 'sine', 0.22);
   }
 
   setVolume(value) {
@@ -562,7 +525,6 @@ class AudioEngine {
   }
 }
 
-// Create singleton
 const audioEngine = typeof window !== 'undefined' ? new AudioEngine() : null;
 const SFX = audioEngine || {
   playShuffle: () => {},
@@ -586,7 +548,7 @@ const SFX = audioEngine || {
   dispose: () => {},
 };
 
-// ─── USE REDUCER (STATE MANAGEMENT) ─────────────────────────────
+// ─── USE REDUCER ──────────────────────────────────────────────────
 
 const APP_INITIAL_STATE = {
   screen: 'login',
@@ -657,19 +619,7 @@ function appReducer(state, action) {
   }
 }
 
-// ─── CONTEXT (DI) ────────────────────────────────────────────────
-
-const AppContext = React.createContext(null);
-
-function useAppContext() {
-  const context = React.useContext(AppContext);
-  if (!context) {
-    throw new Error('useAppContext must be used within AppProvider');
-  }
-  return context;
-}
-
-// ─── TOAST SYSTEM ─────────────────────────────────────────────────
+// ─── TOAST CONTAINER ──────────────────────────────────────────────
 
 function ToastContainer({ toasts, onRemove }) {
   return createPortal(
@@ -759,7 +709,7 @@ function ToastContainer({ toasts, onRemove }) {
   );
 }
 
-// ─── BACKGROUND COMPONENT (OPTIMIZED) ───────────────────────────
+// ─── BACKGROUND COMPONENT ─────────────────────────────────────────
 
 const Background = memo(function Background({ variant = 'default' }) {
   const orbs = useMemo(
@@ -862,7 +812,7 @@ const Background = memo(function Background({ variant = 'default' }) {
 
 Background.displayName = 'Background';
 
-// ─── CARD COMPONENT (FULLY OPTIMIZED) ───────────────────────────
+// ─── CARD COMPONENT ───────────────────────────────────────────────
 
 const Card = memo(function Card({
   card,
@@ -878,9 +828,7 @@ const Card = memo(function Card({
   className = '',
   style = {},
 }) {
-  const cardRef = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
-  const [isTouched, setIsTouched] = useState(false);
 
   const width = small ? 50 : 68;
   const height = small ? 72 : 100;
@@ -909,7 +857,6 @@ const Card = memo(function Card({
   if (faceDown) {
     return (
       <motion.div
-        ref={cardRef}
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: animDelay, type: 'spring', stiffness: 300, damping: 25 }}
@@ -952,7 +899,6 @@ const Card = memo(function Card({
 
   return (
     <motion.div
-      ref={cardRef}
       role="button"
       tabIndex={isPlayable ? 0 : -1}
       aria-label={`${cardRank} ${cardSymbol}`}
@@ -1116,7 +1062,7 @@ const Card = memo(function Card({
 
 Card.displayName = 'Card';
 
-// ─── BUTTON COMPONENT ────────────────────────────────────────────
+// ─── BUTTON COMPONENT ─────────────────────────────────────────────
 
 const Button = memo(function Button({
   children,
@@ -1133,42 +1079,12 @@ const Button = memo(function Button({
 }) {
   const colorMap = useMemo(
     () => ({
-      cyan: {
-        color: 'var(--cyan)',
-        bg: 'rgba(0,229,255,0.08)',
-        border: 'rgba(0,229,255,0.4)',
-        glow: 'rgba(0,229,255,0.2)',
-      },
-      gold: {
-        color: 'var(--gold)',
-        bg: 'rgba(245,200,66,0.08)',
-        border: 'rgba(245,200,66,0.4)',
-        glow: 'rgba(245,200,66,0.2)',
-      },
-      pink: {
-        color: 'var(--pink)',
-        bg: 'rgba(255,45,110,0.08)',
-        border: 'rgba(255,45,110,0.4)',
-        glow: 'rgba(255,45,110,0.2)',
-      },
-      green: {
-        color: 'var(--green)',
-        bg: 'rgba(0,255,148,0.08)',
-        border: 'rgba(0,255,148,0.4)',
-        glow: 'rgba(0,255,148,0.2)',
-      },
-      purple: {
-        color: 'var(--purple)',
-        bg: 'rgba(168,85,247,0.08)',
-        border: 'rgba(168,85,247,0.4)',
-        glow: 'rgba(168,85,247,0.2)',
-      },
-      red: {
-        color: 'var(--red)',
-        bg: 'rgba(255,59,92,0.08)',
-        border: 'rgba(255,59,92,0.4)',
-        glow: 'rgba(255,59,92,0.2)',
-      },
+      cyan: { color: 'var(--cyan)', bg: 'rgba(0,229,255,0.08)', border: 'rgba(0,229,255,0.4)', glow: 'rgba(0,229,255,0.2)' },
+      gold: { color: 'var(--gold)', bg: 'rgba(245,200,66,0.08)', border: 'rgba(245,200,66,0.4)', glow: 'rgba(245,200,66,0.2)' },
+      pink: { color: 'var(--pink)', bg: 'rgba(255,45,110,0.08)', border: 'rgba(255,45,110,0.4)', glow: 'rgba(255,45,110,0.2)' },
+      green: { color: 'var(--green)', bg: 'rgba(0,255,148,0.08)', border: 'rgba(0,255,148,0.4)', glow: 'rgba(0,255,148,0.2)' },
+      purple: { color: 'var(--purple)', bg: 'rgba(168,85,247,0.08)', border: 'rgba(168,85,247,0.4)', glow: 'rgba(168,85,247,0.2)' },
+      red: { color: 'var(--red)', bg: 'rgba(255,59,92,0.08)', border: 'rgba(255,59,92,0.4)', glow: 'rgba(255,59,92,0.2)' },
     }),
     []
   );
@@ -1204,10 +1120,7 @@ const Button = memo(function Button({
         letterSpacing: '0.08em',
         textTransform: 'uppercase',
         cursor: disabled || loading ? 'not-allowed' : 'pointer',
-        boxShadow:
-          disabled || loading
-            ? 'none'
-            : `0 0 20px ${colors.glow}, inset 0 0 20px ${colors.glow}30`,
+        boxShadow: disabled || loading ? 'none' : `0 0 20px ${colors.glow}, inset 0 0 20px ${colors.glow}30`,
         transition: 'all 0.2s ease',
         width: full ? '100%' : 'auto',
         position: 'relative',
@@ -1221,14 +1134,7 @@ const Button = memo(function Button({
     >
       {!disabled && !loading && <div className="shimmer-line" />}
       {loading ? (
-        <span
-          style={{
-            display: 'inline-block',
-            animation: 'spin-slow 1s linear infinite',
-          }}
-        >
-          ⏳
-        </span>
+        <span style={{ display: 'inline-block', animation: 'spin-slow 1s linear infinite' }}>⏳</span>
       ) : (
         <>
           {icon && <span>{icon}</span>}
@@ -1241,7 +1147,7 @@ const Button = memo(function Button({
 
 Button.displayName = 'Button';
 
-// ─── INPUT COMPONENT ─────────────────────────────────────────────
+// ─── INPUT COMPONENT ──────────────────────────────────────────────
 
 const Input = memo(function Input({
   value,
@@ -1265,38 +1171,26 @@ const Input = memo(function Input({
     }
   }, [autoFocus]);
 
-  const handleChange = useCallback(
-    (e) => {
-      if (onChange) {
-        onChange(e.target.value);
-      }
-    },
-    [onChange]
-  );
+  const handleChange = useCallback((e) => {
+    if (onChange) onChange(e.target.value);
+  }, [onChange]);
 
-  const handleKeyDown = useCallback(
-    (e) => {
-      if (onKeyDown) {
-        onKeyDown(e);
-      }
-    },
-    [onKeyDown]
-  );
+  const handleKeyDown = useCallback((e) => {
+    if (onKeyDown) onKeyDown(e);
+  }, [onKeyDown]);
 
   return (
     <div style={{ width: '100%', ...style }}>
       {label && (
-        <label
-          style={{
-            display: 'block',
-            color: 'var(--dim)',
-            fontFamily: 'var(--font-ui)',
-            fontSize: 10,
-            letterSpacing: '0.15em',
-            marginBottom: 6,
-            textTransform: 'uppercase',
-          }}
-        >
+        <label style={{
+          display: 'block',
+          color: 'var(--dim)',
+          fontFamily: 'var(--font-ui)',
+          fontSize: 10,
+          letterSpacing: '0.15em',
+          marginBottom: 6,
+          textTransform: 'uppercase',
+        }}>
           {label}
         </label>
       )}
@@ -1311,9 +1205,7 @@ const Input = memo(function Input({
         disabled={disabled}
         style={{
           background: 'rgba(0,229,255,0.05)',
-          border: error
-            ? '1px solid var(--pink)'
-            : '1px solid rgba(0,229,255,0.3)',
+          border: error ? '1px solid var(--pink)' : '1px solid rgba(0,229,255,0.3)',
           borderRadius: 8,
           color: disabled ? 'var(--dim)' : 'var(--cyan)',
           padding: '12px 16px',
@@ -1322,9 +1214,7 @@ const Input = memo(function Input({
           letterSpacing: '0.04em',
           outline: 'none',
           width: '100%',
-          boxShadow: error
-            ? '0 0 20px rgba(255,45,110,0.15)'
-            : '0 0 20px rgba(0,229,255,0.08)',
+          boxShadow: error ? '0 0 20px rgba(255,45,110,0.15)' : '0 0 20px rgba(0,229,255,0.08)',
           transition: 'all 0.3s ease',
           cursor: disabled ? 'not-allowed' : 'text',
           opacity: disabled ? 0.5 : 1,
@@ -1337,12 +1227,8 @@ const Input = memo(function Input({
         }}
         onBlur={(e) => {
           if (!disabled) {
-            e.target.style.borderColor = error
-              ? 'var(--pink)'
-              : 'rgba(0,229,255,0.3)';
-            e.target.style.boxShadow = error
-              ? '0 0 20px rgba(255,45,110,0.15)'
-              : '0 0 20px rgba(0,229,255,0.08)';
+            e.target.style.borderColor = error ? 'var(--pink)' : 'rgba(0,229,255,0.3)';
+            e.target.style.boxShadow = error ? '0 0 20px rgba(255,45,110,0.15)' : '0 0 20px rgba(0,229,255,0.08)';
           }
         }}
       />
@@ -1357,7 +1243,7 @@ const Input = memo(function Input({
 
 Input.displayName = 'Input';
 
-// ─── SCREEN: LOGIN ───────────────────────────────────────────────
+// ─── SCREEN: LOGIN ────────────────────────────────────────────────
 
 const LoginScreen = memo(function LoginScreen({ onLogin }) {
   const [nickname, setNickname] = useState('');
@@ -1367,9 +1253,7 @@ const LoginScreen = memo(function LoginScreen({ onLogin }) {
 
   useEffect(() => {
     const savedNickname = localStorage.getItem('karta_nick');
-    if (savedNickname) {
-      setNickname(savedNickname);
-    }
+    if (savedNickname) setNickname(savedNickname);
     const timer = setTimeout(() => setIsReady(true), 1600);
     return () => clearTimeout(timer);
   }, []);
@@ -1391,28 +1275,13 @@ const LoginScreen = memo(function LoginScreen({ onLogin }) {
     setTimeout(() => onLogin(trimmed), 400);
   }, [nickname, onLogin]);
 
-  const handleKeyDown = useCallback(
-    (e) => {
-      if (e.key === 'Enter') {
-        handleSubmit();
-      }
-    },
-    [handleSubmit]
-  );
+  const handleKeyDown = useCallback((e) => {
+    if (e.key === 'Enter') handleSubmit();
+  }, [handleSubmit]);
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 100,
-      }}
-    >
+    <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
       <Background />
-
       <AnimatePresence mode="wait">
         {!isReady ? (
           <motion.div
@@ -1466,15 +1335,12 @@ const LoginScreen = memo(function LoginScreen({ onLogin }) {
             animate={{ opacity: 1, y: 0 }}
             style={{ zIndex: 1, width: '100%', maxWidth: 420, padding: '0 20px' }}
           >
-            <div
-              className="glass"
-              style={{
-                borderRadius: 20,
-                padding: '44px 36px',
-                boxShadow: 'var(--shadow-2xl), 0 0 80px rgba(0,229,255,0.05)',
-                border: '1px solid rgba(0,229,255,0.08)',
-              }}
-            >
+            <div className="glass" style={{
+              borderRadius: 20,
+              padding: '44px 36px',
+              boxShadow: 'var(--shadow-2xl), 0 0 80px rgba(0,229,255,0.05)',
+              border: '1px solid rgba(0,229,255,0.08)',
+            }}>
               <div style={{ textAlign: 'center', marginBottom: 36 }}>
                 <motion.div
                   animate={{ y: [0, -8, 0] }}
@@ -1483,25 +1349,21 @@ const LoginScreen = memo(function LoginScreen({ onLogin }) {
                 >
                   🎴
                 </motion.div>
-                <h1
-                  style={{
-                    fontFamily: 'var(--font-d)',
-                    fontSize: 22,
-                    color: 'var(--gold)',
-                    textShadow: '0 0 20px var(--gold)',
-                  }}
-                >
+                <h1 style={{
+                  fontFamily: 'var(--font-d)',
+                  fontSize: 22,
+                  color: 'var(--gold)',
+                  textShadow: '0 0 20px var(--gold)',
+                }}>
                   KARTA O'YINI
                 </h1>
-                <p
-                  style={{
-                    color: 'var(--dim)',
-                    fontSize: 11,
-                    marginTop: 8,
-                    fontFamily: 'var(--font-ui)',
-                    letterSpacing: '0.15em',
-                  }}
-                >
+                <p style={{
+                  color: 'var(--dim)',
+                  fontSize: 11,
+                  marginTop: 8,
+                  fontFamily: 'var(--font-ui)',
+                  letterSpacing: '0.15em',
+                }}>
                   NICKNAME KIRITING
                 </p>
               </div>
@@ -1529,16 +1391,14 @@ const LoginScreen = memo(function LoginScreen({ onLogin }) {
                 {loading ? 'YUKLANMOQDA...' : "O'YINGA KIRISH →"}
               </Button>
 
-              <p
-                style={{
-                  textAlign: 'center',
-                  color: 'var(--dimmer)',
-                  fontSize: 10,
-                  marginTop: 18,
-                  fontFamily: 'var(--font-ui)',
-                  letterSpacing: '0.05em',
-                }}
-              >
+              <p style={{
+                textAlign: 'center',
+                color: 'var(--dimmer)',
+                fontSize: 10,
+                marginTop: 18,
+                fontFamily: 'var(--font-ui)',
+                letterSpacing: '0.05em',
+              }}>
                 O'ZBEKISTON • ONLINE KARTA O'YINI
               </p>
             </div>
@@ -1551,146 +1411,92 @@ const LoginScreen = memo(function LoginScreen({ onLogin }) {
 
 LoginScreen.displayName = 'LoginScreen';
 
-// ─── SCREEN: MENU ────────────────────────────────────────────────
+// ─── SCREEN: MENU ─────────────────────────────────────────────────
 
 const MenuScreen = memo(function MenuScreen({ nickname, onSelectGame, onLogout }) {
-  const games = useMemo(
-    () => [
-      {
-        id: 'bura',
-        icon: '🃏',
-        title: "TO'RT BURA",
-        subtitle: '2 yoki 4 kishilik',
-        description:
-          "Oʻzbek klassik kozel oʻyini. Kartalar bilan trick yutib, 61+ ball yigʻing. 12 jarima = yutqazding!",
-        rules: [
-          'Tuz=11, 10=10, Shoh=4, Dama=3, Valet=2',
-          'Kozir istalgan kartani uradi',
-          'Jarima: 61+=0, 32-60=2, 1-31=4, 0=6 shtraf',
-        ],
-        color: 'var(--gold)',
-        glow: 'rgba(245,200,66,0.12)',
-      },
-      {
-        id: '108',
-        icon: '🔥',
-        title: '108',
-        subtitle: '2-6 kishilik',
-        description:
-          "Kartalardan qutuling! Maxsus kartalar bilan raqibga karta bering yoki uning navbatini o'tkazib yuboring.",
-        rules: [
-          '6=+2 karta, 7=+1 karta, K♠=+4 karta',
-          'Dama=suit o\'zgartirish, 8=skip, Valet=burilish',
-          'Birinchi kartasiz qolgan g\'alaba!',
-        ],
-        color: 'var(--pink)',
-        glow: 'rgba(255,45,110,0.12)',
-      },
-    ],
-    []
-  );
+  const games = useMemo(() => [
+    {
+      id: 'bura',
+      icon: '🃏',
+      title: "TO'RT BURA",
+      subtitle: '2 yoki 4 kishilik',
+      description: "Oʻzbek klassik kozel oʻyini. Kartalar bilan trick yutib, 61+ ball yigʻing. 12 jarima = yutqazding!",
+      rules: ['Tuz=11, 10=10, Shoh=4, Dama=3, Valet=2', 'Kozir istalgan kartani uradi', 'Jarima: 61+=0, 32-60=2, 1-31=4, 0=6 shtraf'],
+      color: 'var(--gold)',
+      glow: 'rgba(245,200,66,0.12)',
+    },
+    {
+      id: '108',
+      icon: '🔥',
+      title: '108',
+      subtitle: '2-6 kishilik',
+      description: "Kartalardan qutuling! Maxsus kartalar bilan raqibga karta bering yoki uning navbatini o'tkazib yuboring.",
+      rules: ['6=+2 karta, 7=+1 karta, K♠=+4 karta', 'Dama=suit o\'zgartirish, 8=skip, Valet=burilish', 'Birinchi kartasiz qolgan g\'alaba!'],
+      color: 'var(--pink)',
+      glow: 'rgba(255,45,110,0.12)',
+    },
+  ], []);
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        zIndex: 10,
-      }}
-    >
+    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', zIndex: 10 }}>
       <Background />
 
-      <header
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '14px 24px',
-          zIndex: 1,
-          background: 'rgba(2,4,8,0.8)',
-          backdropFilter: 'blur(12px)',
-          borderBottom: '1px solid rgba(0,229,255,0.06)',
-        }}
-      >
+      <header style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '14px 24px',
+        zIndex: 1,
+        background: 'rgba(2,4,8,0.8)',
+        backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid rgba(0,229,255,0.06)',
+      }}>
         <div>
-          <div
-            style={{
-              fontFamily: 'var(--font-d)',
-              fontSize: 16,
-              color: 'var(--gold)',
-              textShadow: '0 0 15px var(--gold)',
-            }}
-          >
+          <div style={{ fontFamily: 'var(--font-d)', fontSize: 16, color: 'var(--gold)', textShadow: '0 0 15px var(--gold)' }}>
             KARTA O'YINI
           </div>
-          <div
-            style={{
-              fontFamily: 'var(--font-ui)',
-              fontSize: 9,
-              color: 'var(--dim)',
-              letterSpacing: '0.2em',
-            }}
-          >
+          <div style={{ fontFamily: 'var(--font-ui)', fontSize: 9, color: 'var(--dim)', letterSpacing: '0.2em' }}>
             ONLINE MULTIPLAYER
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div
-            style={{
-              padding: '6px 14px',
-              borderRadius: 6,
-              background: 'rgba(0,229,255,0.07)',
-              border: '1px solid rgba(0,229,255,0.15)',
-              fontFamily: 'var(--font-ui)',
-              fontSize: 11,
-              color: 'var(--cyan)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 7,
-            }}
-          >
-            <div
-              style={{
-                width: 6,
-                height: 6,
-                borderRadius: '50%',
-                background: 'var(--green)',
-                boxShadow: '0 0 8px var(--green)',
-              }}
-            />
+          <div style={{
+            padding: '6px 14px',
+            borderRadius: 6,
+            background: 'rgba(0,229,255,0.07)',
+            border: '1px solid rgba(0,229,255,0.15)',
+            fontFamily: 'var(--font-ui)',
+            fontSize: 11,
+            color: 'var(--cyan)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 7,
+          }}>
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--green)', boxShadow: '0 0 8px var(--green)' }} />
             {nickname}
           </div>
-          <Button small color="red" onClick={onLogout}>
-            CHIQISH
-          </Button>
+          <Button small color="red" onClick={onLogout}>CHIQISH</Button>
         </div>
       </header>
 
-      <div
-        style={{
-          flex: 1,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '30px 20px',
-          zIndex: 1,
-          gap: 'clamp(16px, 3vw, 40px)',
-          flexWrap: 'wrap',
-          alignContent: 'center',
-        }}
-      >
+      <div style={{
+        flex: 1,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '30px 20px',
+        zIndex: 1,
+        gap: 'clamp(16px, 3vw, 40px)',
+        flexWrap: 'wrap',
+        alignContent: 'center',
+      }}>
         {games.map((game, index) => (
           <motion.div
             key={game.id}
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.12, type: 'spring', stiffness: 120 }}
-            onClick={() => {
-              SFX.playJoin();
-              onSelectGame(game.id);
-            }}
+            onClick={() => { SFX.playJoin(); onSelectGame(game.id); }}
             whileHover={{ scale: 1.03, y: -8 }}
             whileTap={{ scale: 0.97 }}
             style={{
@@ -1707,98 +1513,53 @@ const MenuScreen = memo(function MenuScreen({ nickname, onSelectGame, onLogout }
             }}
           >
             <div className="shimmer-line" />
-            <div
-              style={{
-                fontSize: 56,
-                marginBottom: 18,
-                textAlign: 'center',
-                animation: `float-y 4s ease-in-out ${index * 0.5}s infinite`,
-              }}
-            >
+            <div style={{ fontSize: 56, marginBottom: 18, textAlign: 'center', animation: `float-y 4s ease-in-out ${index * 0.5}s infinite` }}>
               {game.icon}
             </div>
-            <h2
-              style={{
-                fontFamily: 'var(--font-d)',
-                fontSize: 20,
-                color: game.color,
-                textShadow: `0 0 20px ${game.color}`,
-                textAlign: 'center',
-                marginBottom: 6,
-              }}
-            >
+            <h2 style={{
+              fontFamily: 'var(--font-d)',
+              fontSize: 20,
+              color: game.color,
+              textShadow: `0 0 20px ${game.color}`,
+              textAlign: 'center',
+              marginBottom: 6,
+            }}>
               {game.title}
             </h2>
-            <div
-              style={{
-                textAlign: 'center',
-                fontFamily: 'var(--font-ui)',
-                fontSize: 10,
-                color: game.color,
-                opacity: 0.7,
-                letterSpacing: '0.15em',
-                marginBottom: 14,
-              }}
-            >
+            <div style={{
+              textAlign: 'center',
+              fontFamily: 'var(--font-ui)',
+              fontSize: 10,
+              color: game.color,
+              opacity: 0.7,
+              letterSpacing: '0.15em',
+              marginBottom: 14,
+            }}>
               {game.subtitle}
             </div>
-            <p
-              style={{
-                color: 'rgba(180,210,255,0.55)',
-                fontSize: 12.5,
-                textAlign: 'center',
-                lineHeight: 1.7,
-                marginBottom: 20,
-              }}
-            >
+            <p style={{ color: 'rgba(180,210,255,0.55)', fontSize: 12.5, textAlign: 'center', lineHeight: 1.7, marginBottom: 20 }}>
               {game.description}
             </p>
-
-            <div
-              style={{
-                borderTop: `1px solid ${game.color}20`,
-                paddingTop: 14,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 5,
-              }}
-            >
+            <div style={{ borderTop: `1px solid ${game.color}20`, paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 5 }}>
               {game.rules.map((rule, ri) => (
-                <div
-                  key={ri}
-                  style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}
-                >
-                  <span
-                    style={{
-                      color: game.color,
-                      fontSize: 10,
-                      flexShrink: 0,
-                      marginTop: 1,
-                    }}
-                  >
-                    ▸
-                  </span>
-                  <span style={{ color: 'var(--dim)', fontSize: 11, lineHeight: 1.4 }}>
-                    {rule}
-                  </span>
+                <div key={ri} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                  <span style={{ color: game.color, fontSize: 10, flexShrink: 0, marginTop: 1 }}>▸</span>
+                  <span style={{ color: 'var(--dim)', fontSize: 11, lineHeight: 1.4 }}>{rule}</span>
                 </div>
               ))}
             </div>
-
-            <div
-              style={{
-                marginTop: 22,
-                padding: '11px',
-                borderRadius: 8,
-                textAlign: 'center',
-                background: `${game.color}12`,
-                border: `1px solid ${game.color}25`,
-                fontFamily: 'var(--font-ui)',
-                fontSize: 11,
-                color: game.color,
-                letterSpacing: '0.1em',
-              }}
-            >
+            <div style={{
+              marginTop: 22,
+              padding: '11px',
+              borderRadius: 8,
+              textAlign: 'center',
+              background: `${game.color}12`,
+              border: `1px solid ${game.color}25`,
+              fontFamily: 'var(--font-ui)',
+              fontSize: 11,
+              color: game.color,
+              letterSpacing: '0.1em',
+            }}>
               O'YNASH →
             </div>
           </motion.div>
@@ -1812,12 +1573,7 @@ MenuScreen.displayName = 'MenuScreen';
 
 // ─── SCREEN: SELECT GAME ─────────────────────────────────────────
 
-const SelectScreen = memo(function SelectScreen({
-  gameMode,
-  onBack,
-  onCreate,
-  onJoin,
-}) {
+const SelectScreen = memo(function SelectScreen({ gameMode, onBack, onCreate, onJoin }) {
   const [tab, setTab] = useState('create');
   const [gameType, setGameType] = useState('2p');
   const [deckCount, setDeckCount] = useState(1);
@@ -1842,72 +1598,40 @@ const SelectScreen = memo(function SelectScreen({
     setRoomCode(value.replace(/\D/g, '').slice(0, 6));
   }, []);
 
-  const handleKeyDown = useCallback(
-    (e) => {
-      if (e.key === 'Enter' && roomCode.length === 6) {
-        handleJoin();
-      }
-    },
-    [roomCode, handleJoin]
-  );
+  const handleKeyDown = useCallback((e) => {
+    if (e.key === 'Enter' && roomCode.length === 6) {
+      handleJoin();
+    }
+  }, [roomCode, handleJoin]);
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        zIndex: 20,
-        overflowY: 'auto',
-      }}
-    >
+    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', zIndex: 20, overflowY: 'auto' }}>
       <Background />
-
-      <div
-        style={{
-          zIndex: 1,
-          maxWidth: 500,
-          margin: '0 auto',
-          width: '100%',
-          padding: '20px 18px',
-        }}
-      >
-        <Button small onClick={onBack} style={{ marginBottom: 22 }}>
-          ← ORQAGA
-        </Button>
+      <div style={{ zIndex: 1, maxWidth: 500, margin: '0 auto', width: '100%', padding: '20px 18px' }}>
+        <Button small onClick={onBack} style={{ marginBottom: 22 }}>← ORQAGA</Button>
 
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <div style={{ fontSize: 46, marginBottom: 10 }}>
-            {isBura ? '🃏' : '🔥'}
-          </div>
-          <h1
-            style={{
-              fontFamily: 'var(--font-d)',
-              fontSize: 22,
-              color: isBura ? 'var(--gold)' : 'var(--pink)',
-              textShadow: `0 0 20px ${isBura ? 'var(--gold)' : 'var(--pink)'}`,
-            }}
-          >
+          <div style={{ fontSize: 46, marginBottom: 10 }}>{isBura ? '🃏' : '🔥'}</div>
+          <h1 style={{
+            fontFamily: 'var(--font-d)',
+            fontSize: 22,
+            color: isBura ? 'var(--gold)' : 'var(--pink)',
+            textShadow: `0 0 20px ${isBura ? 'var(--gold)' : 'var(--pink)'}`,
+          }}>
             {isBura ? "TO'RT BURA" : '108'}
           </h1>
         </div>
 
-        <div
-          style={{
-            display: 'flex',
-            gap: 3,
-            marginBottom: 22,
-            background: 'rgba(255,255,255,0.02)',
-            borderRadius: 9,
-            padding: 3,
-            border: '1px solid rgba(0,229,255,0.06)',
-          }}
-        >
-          {[
-            ['create', '+ XONA YARATISH'],
-            ['join', '→ XONAGA KIRISH'],
-          ].map(([tabId, label]) => (
+        <div style={{
+          display: 'flex',
+          gap: 3,
+          marginBottom: 22,
+          background: 'rgba(255,255,255,0.02)',
+          borderRadius: 9,
+          padding: 3,
+          border: '1px solid rgba(0,229,255,0.06)',
+        }}>
+          {[['create', '+ XONA YARATISH'], ['join', '→ XONAGA KIRISH']].map(([tabId, label]) => (
             <button
               key={tabId}
               onClick={() => setTab(tabId)}
@@ -1916,9 +1640,7 @@ const SelectScreen = memo(function SelectScreen({
                 padding: '11px',
                 borderRadius: 7,
                 background: tab === tabId ? 'rgba(0,229,255,0.1)' : 'transparent',
-                border: tab === tabId
-                  ? '1px solid rgba(0,229,255,0.25)'
-                  : '1px solid transparent',
+                border: tab === tabId ? '1px solid rgba(0,229,255,0.25)' : '1px solid transparent',
                 color: tab === tabId ? 'var(--cyan)' : 'var(--dim)',
                 fontFamily: 'var(--font-ui)',
                 fontSize: 11,
@@ -1936,34 +1658,15 @@ const SelectScreen = memo(function SelectScreen({
 
         <AnimatePresence mode="wait">
           {tab === 'create' ? (
-            <motion.div
-              key="create"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-            >
-              <div
-                className="glass"
-                style={{ borderRadius: 16, padding: '26px 22px' }}
-              >
+            <motion.div key="create" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+              <div className="glass" style={{ borderRadius: 16, padding: '26px 22px' }}>
                 {isBura && (
                   <div style={{ marginBottom: 22 }}>
-                    <p
-                      style={{
-                        color: 'var(--dim)',
-                        fontFamily: 'var(--font-ui)',
-                        fontSize: 10,
-                        letterSpacing: '0.15em',
-                        marginBottom: 10,
-                      }}
-                    >
+                    <p style={{ color: 'var(--dim)', fontFamily: 'var(--font-ui)', fontSize: 10, letterSpacing: '0.15em', marginBottom: 10 }}>
                       O'YINCHILAR SONI
                     </p>
                     <div style={{ display: 'flex', gap: 8 }}>
-                      {[
-                        ['2p', '2 KISHILIK'],
-                        ['4p', '4 KISHILIK (2v2)'],
-                      ].map(([value, label]) => (
+                      {[['2p', '2 KISHILIK'], ['4p', '4 KISHILIK (2v2)']].map(([value, label]) => (
                         <button
                           key={value}
                           onClick={() => setGameType(value)}
@@ -1971,15 +1674,8 @@ const SelectScreen = memo(function SelectScreen({
                             flex: 1,
                             padding: '13px 8px',
                             borderRadius: 8,
-                            background:
-                              gameType === value
-                                ? 'rgba(245,200,66,0.12)'
-                                : 'rgba(255,255,255,0.03)',
-                            border: `1px solid ${
-                              gameType === value
-                                ? 'var(--gold)'
-                                : 'rgba(255,255,255,0.06)'
-                            }`,
+                            background: gameType === value ? 'rgba(245,200,66,0.12)' : 'rgba(255,255,255,0.03)',
+                            border: `1px solid ${gameType === value ? 'var(--gold)' : 'rgba(255,255,255,0.06)'}`,
                             color: gameType === value ? 'var(--gold)' : 'var(--dim)',
                             fontFamily: 'var(--font-ui)',
                             fontSize: 10.5,
@@ -1998,15 +1694,7 @@ const SelectScreen = memo(function SelectScreen({
 
                 {!isBura && (
                   <div style={{ marginBottom: 22 }}>
-                    <p
-                      style={{
-                        color: 'var(--dim)',
-                        fontFamily: 'var(--font-ui)',
-                        fontSize: 10,
-                        letterSpacing: '0.15em',
-                        marginBottom: 10,
-                      }}
-                    >
+                    <p style={{ color: 'var(--dim)', fontFamily: 'var(--font-ui)', fontSize: 10, letterSpacing: '0.15em', marginBottom: 10 }}>
                       DAST SONI
                     </p>
                     <div style={{ display: 'flex', gap: 8 }}>
@@ -2018,15 +1706,8 @@ const SelectScreen = memo(function SelectScreen({
                             flex: 1,
                             padding: '13px 8px',
                             borderRadius: 8,
-                            background:
-                              deckCount === count
-                                ? 'rgba(255,45,110,0.12)'
-                                : 'rgba(255,255,255,0.03)',
-                            border: `1px solid ${
-                              deckCount === count
-                                ? 'var(--pink)'
-                                : 'rgba(255,255,255,0.06)'
-                            }`,
+                            background: deckCount === count ? 'rgba(255,45,110,0.12)' : 'rgba(255,255,255,0.03)',
+                            border: `1px solid ${deckCount === count ? 'var(--pink)' : 'rgba(255,255,255,0.06)'}`,
                             color: deckCount === count ? 'var(--pink)' : 'var(--dim)',
                             fontFamily: 'var(--font-ui)',
                             fontSize: 12,
@@ -2042,37 +1723,15 @@ const SelectScreen = memo(function SelectScreen({
                   </div>
                 )}
 
-                <Button
-                  color={isBura ? 'gold' : 'pink'}
-                  onClick={handleCreate}
-                  full
-                  loading={isBusy}
-                  style={{ padding: '14px', fontSize: 13 }}
-                >
+                <Button color={isBura ? 'gold' : 'pink'} onClick={handleCreate} full loading={isBusy} style={{ padding: '14px', fontSize: 13 }}>
                   XONA YARATISH
                 </Button>
               </div>
             </motion.div>
           ) : (
-            <motion.div
-              key="join"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-            >
-              <div
-                className="glass"
-                style={{ borderRadius: 16, padding: '26px 22px' }}
-              >
-                <p
-                  style={{
-                    color: 'var(--dim)',
-                    fontFamily: 'var(--font-ui)',
-                    fontSize: 10,
-                    letterSpacing: '0.15em',
-                    marginBottom: 10,
-                  }}
-                >
+            <motion.div key="join" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+              <div className="glass" style={{ borderRadius: 16, padding: '26px 22px' }}>
+                <p style={{ color: 'var(--dim)', fontFamily: 'var(--font-ui)', fontSize: 10, letterSpacing: '0.15em', marginBottom: 10 }}>
                   XONA KODI (6 RAQAM)
                 </p>
                 <div style={{ marginBottom: 18 }}>
@@ -2106,7 +1765,7 @@ const SelectScreen = memo(function SelectScreen({
 
 SelectScreen.displayName = 'SelectScreen';
 
-// ─── SCREEN: LOBBY ───────────────────────────────────────────────
+// ─── SCREEN: LOBBY ────────────────────────────────────────────────
 
 const LobbyScreen = memo(function LobbyScreen({
   room,
@@ -2149,24 +1808,15 @@ const LobbyScreen = memo(function LobbyScreen({
     }
   }, [message, onSendChat]);
 
-  const handleKeyDown = useCallback(
-    (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        handleSend();
-      }
-    },
-    [handleSend]
-  );
+  const handleKeyDown = useCallback((e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  }, [handleSend]);
 
-  const avatarColor = useCallback(
-    (name) => `hsl(${name.charCodeAt(0) * 13 % 360}, 55%, 28%)`,
-    []
-  );
-  const avatarBorder = useCallback(
-    (name) => `hsl(${name.charCodeAt(0) * 13 % 360}, 75%, 50%)`,
-    []
-  );
+  const avatarColor = useCallback((name) => `hsl(${name.charCodeAt(0) * 13 % 360}, 55%, 28%)`, []);
+  const avatarBorder = useCallback((name) => `hsl(${name.charCodeAt(0) * 13 % 360}, 75%, 50%)`, []);
 
   const playersList = useMemo(() => {
     const list = [];
@@ -2177,125 +1827,45 @@ const LobbyScreen = memo(function LobbyScreen({
   }, [room.players, room.maxPlayers]);
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
+    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', zIndex: 20 }}>
+      <Background />
+      <div style={{
+        flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        zIndex: 20,
-      }}
-    >
-      <Background />
-
-      <div
-        style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          zIndex: 1,
-          overflow: 'hidden',
-          maxWidth: 680,
-          margin: '0 auto',
-          width: '100%',
-          padding: '14px 16px',
-        }}
-      >
-        <header
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: 14,
-          }}
-        >
+        zIndex: 1,
+        overflow: 'hidden',
+        maxWidth: 680,
+        margin: '0 auto',
+        width: '100%',
+        padding: '14px 16px',
+      }}>
+        <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
           <div>
-            <h2
-              style={{
-                fontFamily: 'var(--font-d)',
-                fontSize: 16,
-                color: 'var(--gold)',
-                textShadow: '0 0 12px var(--gold)',
-              }}
-            >
+            <h2 style={{ fontFamily: 'var(--font-d)', fontSize: 16, color: 'var(--gold)', textShadow: '0 0 12px var(--gold)' }}>
               {room.gameMode === 'bura' ? "TO'RT BURA" : '108'} — LOBBY
             </h2>
-            <p
-              style={{
-                color: 'var(--dim)',
-                fontSize: 10,
-                fontFamily: 'var(--font-ui)',
-              }}
-            >
-              {room.players.length}/{room.maxPlayers} O'YINCHI •{' '}
-              {room.gameMode === 'bura'
-                ? room.gameType === '4p'
-                  ? '4 KISHILIK 2v2'
-                  : '2 KISHILIK'
+            <p style={{ color: 'var(--dim)', fontSize: 10, fontFamily: 'var(--font-ui)' }}>
+              {room.players.length}/{room.maxPlayers} O'YINCHI • {room.gameMode === 'bura'
+                ? room.gameType === '4p' ? '4 KISHILIK 2v2' : '2 KISHILIK'
                 : `${room.deckCount} DAST`}
             </p>
           </div>
-          <Button small color="red" onClick={onLeave}>
-            CHIQISH
-          </Button>
+          <Button small color="red" onClick={onLeave}>CHIQISH</Button>
         </header>
 
-        <div
-          className="glass"
-          style={{
-            borderRadius: 12,
-            padding: '14px 18px',
-            marginBottom: 12,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
+        <div className="glass" style={{ borderRadius: 12, padding: '14px 18px', marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <p
-              style={{
-                color: 'var(--dim)',
-                fontFamily: 'var(--font-ui)',
-                fontSize: 9,
-                letterSpacing: '0.2em',
-                marginBottom: 3,
-              }}
-            >
-              XONA KODI
-            </p>
-            <div
-              style={{
-                fontFamily: 'var(--font-ui)',
-                fontSize: 26,
-                fontWeight: 900,
-                color: 'var(--cyan)',
-                letterSpacing: '0.3em',
-                textShadow: '0 0 20px var(--cyan)',
-              }}
-            >
+            <p style={{ color: 'var(--dim)', fontFamily: 'var(--font-ui)', fontSize: 9, letterSpacing: '0.2em', marginBottom: 3 }}>XONA KODI</p>
+            <div style={{ fontFamily: 'var(--font-ui)', fontSize: 26, fontWeight: 900, color: 'var(--cyan)', letterSpacing: '0.3em', textShadow: '0 0 20px var(--cyan)' }}>
               {room.id}
             </div>
           </div>
-          <Button small color="cyan" onClick={handleCopyCode}>
-            {copied ? '✓ NUSXA' : 'NUSXA OLISH'}
-          </Button>
+          <Button small color="cyan" onClick={handleCopyCode}>{copied ? '✓ NUSXA' : 'NUSXA OLISH'}</Button>
         </div>
 
-        <div
-          className="glass"
-          style={{ borderRadius: 12, padding: '14px', marginBottom: 12 }}
-        >
-          <p
-            style={{
-              color: 'var(--dim)',
-              fontFamily: 'var(--font-ui)',
-              fontSize: 9,
-              letterSpacing: '0.2em',
-              marginBottom: 10,
-            }}
-          >
-            O'YINCHILAR
-          </p>
+        <div className="glass" style={{ borderRadius: 12, padding: '14px', marginBottom: 12 }}>
+          <p style={{ color: 'var(--dim)', fontFamily: 'var(--font-ui)', fontSize: 9, letterSpacing: '0.2em', marginBottom: 10 }}>O'YINCHILAR</p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             {playersList.map((player, index) => {
               const isMe = player?.id === socketId;
@@ -2310,16 +1880,8 @@ const LobbyScreen = memo(function LobbyScreen({
                   style={{
                     padding: '10px 12px',
                     borderRadius: 8,
-                    background: player
-                      ? isMe
-                        ? 'rgba(0,229,255,0.07)'
-                        : 'rgba(255,255,255,0.03)'
-                      : 'rgba(255,255,255,0.015)',
-                    border: player
-                      ? isMe
-                        ? '1px solid rgba(0,229,255,0.2)'
-                        : '1px solid rgba(255,255,255,0.06)'
-                      : '1px dashed rgba(255,255,255,0.04)',
+                    background: player ? (isMe ? 'rgba(0,229,255,0.07)' : 'rgba(255,255,255,0.03)') : 'rgba(255,255,255,0.015)',
+                    border: player ? (isMe ? '1px solid rgba(0,229,255,0.2)' : '1px solid rgba(255,255,255,0.06)') : '1px dashed rgba(255,255,255,0.04)',
                     display: 'flex',
                     alignItems: 'center',
                     gap: 8,
@@ -2327,57 +1889,28 @@ const LobbyScreen = memo(function LobbyScreen({
                 >
                   {player ? (
                     <>
-                      <div
-                        style={{
-                          width: 30,
-                          height: 30,
-                          borderRadius: '50%',
-                          background: avatarColor(player.nickname),
-                          border: `2px solid ${avatarBorder(player.nickname)}`,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: 13,
-                          fontWeight: 700,
-                          color: '#fff',
-                          flexShrink: 0,
-                        }}
-                      >
+                      <div style={{
+                        width: 30,
+                        height: 30,
+                        borderRadius: '50%',
+                        background: avatarColor(player.nickname),
+                        border: `2px solid ${avatarBorder(player.nickname)}`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 13,
+                        fontWeight: 700,
+                        color: '#fff',
+                        flexShrink: 0,
+                      }}>
                         {player.nickname[0].toUpperCase()}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div
-                          style={{
-                            fontSize: 12.5,
-                            fontWeight: 600,
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                          }}
-                        >
-                          {player.nickname}{' '}
-                          {isMe && (
-                            <span style={{ color: 'var(--cyan)', fontSize: 9 }}>
-                              (sen)
-                            </span>
-                          )}
+                        <div style={{ fontSize: 12.5, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {player.nickname} {isMe && <span style={{ color: 'var(--cyan)', fontSize: 9 }}>(sen)</span>}
                         </div>
-                        <div
-                          style={{
-                            fontSize: 9.5,
-                            fontFamily: 'var(--font-ui)',
-                            color: isHostPlayer
-                              ? 'var(--gold)'
-                              : isReadyPlayer
-                              ? 'var(--green)'
-                              : 'var(--dim)',
-                          }}
-                        >
-                          {isHostPlayer
-                            ? '👑 HOST'
-                            : isReadyPlayer
-                            ? '✓ TAYYOR'
-                            : 'kutmoqda...'}
+                        <div style={{ fontSize: 9.5, fontFamily: 'var(--font-ui)', color: isHostPlayer ? 'var(--gold)' : isReadyPlayer ? 'var(--green)' : 'var(--dim)' }}>
+                          {isHostPlayer ? '👑 HOST' : isReadyPlayer ? '✓ TAYYOR' : 'kutmoqda...'}
                         </div>
                       </div>
                     </>
@@ -2385,13 +1918,7 @@ const LobbyScreen = memo(function LobbyScreen({
                     <motion.div
                       animate={{ opacity: [0.3, 0.7, 0.3] }}
                       transition={{ repeat: Infinity, duration: 1.5 }}
-                      style={{
-                        color: 'var(--dimmer)',
-                        fontSize: 11,
-                        fontFamily: 'var(--font-ui)',
-                        width: '100%',
-                        textAlign: 'center',
-                      }}
+                      style={{ color: 'var(--dimmer)', fontSize: 11, fontFamily: 'var(--font-ui)', width: '100%', textAlign: 'center' }}
                     >
                       BO'SH SLOT...
                     </motion.div>
@@ -2402,73 +1929,17 @@ const LobbyScreen = memo(function LobbyScreen({
           </div>
         </div>
 
-        <div
-          className="glass"
-          style={{
-            borderRadius: 12,
-            padding: '12px',
-            marginBottom: 12,
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            minHeight: 0,
-            overflow: 'hidden',
-          }}
-        >
-          <p
-            style={{
-              color: 'var(--dim)',
-              fontFamily: 'var(--font-ui)',
-              fontSize: 9,
-              letterSpacing: '0.2em',
-              marginBottom: 8,
-            }}
-          >
-            CHAT
-          </p>
-          <div
-            ref={chatContainerRef}
-            style={{
-              flex: 1,
-              overflowY: 'auto',
-              marginBottom: 8,
-              minHeight: 0,
-              paddingRight: 4,
-            }}
-          >
+        <div className="glass" style={{ borderRadius: 12, padding: '12px', marginBottom: 12, flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
+          <p style={{ color: 'var(--dim)', fontFamily: 'var(--font-ui)', fontSize: 9, letterSpacing: '0.2em', marginBottom: 8 }}>CHAT</p>
+          <div ref={chatContainerRef} style={{ flex: 1, overflowY: 'auto', marginBottom: 8, minHeight: 0, paddingRight: 4 }}>
             {chats.map((chat) => (
-              <div
-                key={chat.id}
-                style={{
-                  marginBottom: 5,
-                  display: 'flex',
-                  gap: 7,
-                  alignItems: 'baseline',
-                }}
-              >
-                <span
-                  style={{
-                    color: 'var(--cyan)',
-                    fontSize: 11.5,
-                    fontWeight: 700,
-                    flexShrink: 0,
-                  }}
-                >
-                  {chat.nickname}:
-                </span>
-                <span style={{ color: 'var(--text)', fontSize: 12.5 }}>
-                  {chat.text}
-                </span>
+              <div key={chat.id} style={{ marginBottom: 5, display: 'flex', gap: 7, alignItems: 'baseline' }}>
+                <span style={{ color: 'var(--cyan)', fontSize: 11.5, fontWeight: 700, flexShrink: 0 }}>{chat.nickname}:</span>
+                <span style={{ color: 'var(--text)', fontSize: 12.5 }}>{chat.text}</span>
               </div>
             ))}
             {typingUsers.length > 0 && (
-              <div
-                style={{
-                  color: 'var(--dim)',
-                  fontSize: 10.5,
-                  fontStyle: 'italic',
-                }}
-              >
+              <div style={{ color: 'var(--dim)', fontSize: 10.5, fontStyle: 'italic' }}>
                 {typingUsers.join(', ')} yozmoqda...
               </div>
             )}
@@ -2491,41 +1962,22 @@ const LobbyScreen = memo(function LobbyScreen({
                 outline: 'none',
                 transition: 'border-color 0.2s',
               }}
-              onFocus={(e) => {
-                e.target.style.borderColor = 'rgba(0,229,255,0.3)';
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = 'rgba(0,229,255,0.12)';
-              }}
+              onFocus={(e) => { e.target.style.borderColor = 'rgba(0,229,255,0.3)'; }}
+              onBlur={(e) => { e.target.style.borderColor = 'rgba(0,229,255,0.12)'; }}
             />
-            <Button small onClick={handleSend}>
-              ↑
-            </Button>
+            <Button small onClick={handleSend}>↑</Button>
           </div>
         </div>
 
         <div style={{ display: 'flex', gap: 10 }}>
           {!isHost && (
-            <Button
-              color={isReady ? 'green' : 'cyan'}
-              onClick={onToggleReady}
-              full
-              style={{ padding: '12px' }}
-            >
+            <Button color={isReady ? 'green' : 'cyan'} onClick={onToggleReady} full style={{ padding: '12px' }}>
               {isReady ? '✓ TAYYOR' : 'TAYYOR'}
             </Button>
           )}
           {isHost && (
-            <Button
-              color="gold"
-              disabled={!canStart}
-              onClick={onStart}
-              full
-              style={{ padding: '12px', fontSize: 13 }}
-            >
-              {canStart
-                ? '▶ BOSHLASH'
-                : `KUTISH... (${room.players.length}/${room.minPlayers})`}
+            <Button color="gold" disabled={!canStart} onClick={onStart} full style={{ padding: '12px', fontSize: 13 }}>
+              {canStart ? '▶ BOSHLASH' : `KUTISH... (${room.players.length}/${room.minPlayers})`}
             </Button>
           )}
         </div>
@@ -2536,36 +1988,18 @@ const LobbyScreen = memo(function LobbyScreen({
 
 LobbyScreen.displayName = 'LobbyScreen';
 
-// ─── BURA: ROUND OVER SCREEN ────────────────────────────────────
+// ─── BURA: ROUND OVER SCREEN ─────────────────────────────────────
 
-const BuraRoundOver = memo(function BuraRoundOver({
-  gameState,
-  room,
-  socketId,
-  onNextRound,
-  onLeave,
-}) {
+const BuraRoundOver = memo(function BuraRoundOver({ gameState, room, socketId, onNextRound, onLeave }) {
   const players = room.players;
   const summary = gameState?.roundSummary || {};
   const isHost = room.host === socketId;
 
-  useEffect(() => {
-    SFX.playNotification();
-  }, []);
+  useEffect(() => { SFX.playNotification(); }, []);
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 100,
-      }}
-    >
+    <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
       <Background />
-
       <motion.div
         initial={{ scale: 0.7, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -2585,156 +2019,50 @@ const BuraRoundOver = memo(function BuraRoundOver({
         }}
       >
         <div style={{ fontSize: 52, marginBottom: 14 }}>📊</div>
-        <h2
-          style={{
-            fontFamily: 'var(--font-d)',
-            fontSize: 20,
-            color: 'var(--cyan)',
-            textShadow: '0 0 20px var(--cyan)',
-            marginBottom: 6,
-          }}
-        >
+        <h2 style={{ fontFamily: 'var(--font-d)', fontSize: 20, color: 'var(--cyan)', textShadow: '0 0 20px var(--cyan)', marginBottom: 6 }}>
           RAUND YAKUNLANDI
         </h2>
-        <p
-          style={{
-            color: 'var(--dim)',
-            fontFamily: 'var(--font-ui)',
-            fontSize: 10,
-            marginBottom: 24,
-          }}
-        >
+        <p style={{ color: 'var(--dim)', fontFamily: 'var(--font-ui)', fontSize: 10, marginBottom: 24 }}>
           RAUND #{gameState?.roundNumber || 1}
         </p>
 
-        <div
-          style={{
-            marginBottom: 20,
-            padding: '12px 16px',
-            borderRadius: 10,
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.06)',
-          }}
-        >
-          <div
-            style={{
-              fontFamily: 'var(--font-ui)',
-              fontSize: 9,
-              color: 'var(--dim)',
-              marginBottom: 8,
-              letterSpacing: '0.1em',
-            }}
-          >
-            JARIMA QOIDASI
-          </div>
-          <div
-            style={{
-              display: 'flex',
-              gap: 6,
-              justifyContent: 'center',
-              flexWrap: 'wrap',
-            }}
-          >
+        <div style={{ marginBottom: 20, padding: '12px 16px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+          <div style={{ fontFamily: 'var(--font-ui)', fontSize: 9, color: 'var(--dim)', marginBottom: 8, letterSpacing: '0.1em' }}>JARIMA QOIDASI</div>
+          <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap' }}>
             {PENALTY_RULES.map((rule) => (
-              <div
-                key={rule.min}
-                style={{
-                  padding: '4px 8px',
-                  borderRadius: 4,
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.06)',
-                  fontSize: 9,
-                  fontFamily: 'var(--font-ui)',
-                  color: rule.color,
-                }}
-              >
+              <div key={rule.min} style={{ padding: '4px 8px', borderRadius: 4, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', fontSize: 9, fontFamily: 'var(--font-ui)', color: rule.color }}>
                 {rule.min}-{rule.max}: {rule.label}
               </div>
             ))}
           </div>
         </div>
 
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 8,
-            marginBottom: 26,
-          }}
-        >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 26 }}>
           {players.map((player) => {
             const stats = summary[player.id] || {};
             const penalty = gameState?.penalties?.[player.id] || 0;
             return (
-              <div
-                key={player.id}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '12px 16px',
-                  borderRadius: 10,
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.06)',
-                }}
-              >
+              <div key={player.id} style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '12px 16px',
+                borderRadius: 10,
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.06)',
+              }}>
                 <div>
-                  <div
-                    style={{
-                      fontFamily: 'var(--font-ui)',
-                      fontSize: 12,
-                      color: 'var(--text)',
-                    }}
-                  >
+                  <div style={{ fontFamily: 'var(--font-ui)', fontSize: 12, color: 'var(--text)' }}>
                     {player.nickname}
-                    {player.id === socketId && (
-                      <span style={{ color: 'var(--cyan)', fontSize: 9, marginLeft: 4 }}>
-                        (sen)
-                      </span>
-                    )}
+                    {player.id === socketId && <span style={{ color: 'var(--cyan)', fontSize: 9, marginLeft: 4 }}>(sen)</span>}
                   </div>
-                  <div
-                    style={{
-                      fontFamily: 'var(--font-ui)',
-                      fontSize: 9,
-                      color: 'var(--dim)',
-                      marginTop: 2,
-                    }}
-                  >
-                    Jami jarima:{' '}
-                    <span
-                      style={{
-                        color: penalty >= 9 ? 'var(--red)' : 'var(--text)',
-                      }}
-                    >
-                      {penalty}
-                    </span>
-                    /12
+                  <div style={{ fontFamily: 'var(--font-ui)', fontSize: 9, color: 'var(--dim)', marginTop: 2 }}>
+                    Jami jarima: <span style={{ color: penalty >= 9 ? 'var(--red)' : 'var(--text)' }}>{penalty}</span>/12
                   </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div
-                    style={{
-                      fontFamily: 'var(--font-ui)',
-                      fontSize: 16,
-                      fontWeight: 700,
-                      color: 'var(--gold)',
-                    }}
-                  >
-                    {stats.points || 0} ball
-                  </div>
-                  <div
-                    style={{
-                      fontFamily: 'var(--font-ui)',
-                      fontSize: 11,
-                      color:
-                        stats.penalty === 0
-                          ? 'var(--green)'
-                          : stats.penalty === 6
-                          ? 'var(--red)'
-                          : 'var(--pink)',
-                    }}
-                  >
+                  <div style={{ fontFamily: 'var(--font-ui)', fontSize: 16, fontWeight: 700, color: 'var(--gold)' }}>{stats.points || 0} ball</div>
+                  <div style={{ fontFamily: 'var(--font-ui)', fontSize: 11, color: stats.penalty === 0 ? 'var(--green)' : stats.penalty === 6 ? 'var(--red)' : 'var(--pink)' }}>
                     +{stats.penalty || 0} shtraf
                   </div>
                 </div>
@@ -2744,27 +2072,10 @@ const BuraRoundOver = memo(function BuraRoundOver({
         </div>
 
         <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
-          {isHost && (
-            <Button color="gold" onClick={onNextRound}>
-              ▶ KEYINGI RAUND
-            </Button>
-          )}
-          <Button color="cyan" onClick={onLeave}>
-            ← MENU
-          </Button>
+          {isHost && <Button color="gold" onClick={onNextRound}>▶ KEYINGI RAUND</Button>}
+          <Button color="cyan" onClick={onLeave}>← MENU</Button>
         </div>
-        {!isHost && (
-          <p
-            style={{
-              color: 'var(--dim)',
-              fontSize: 10,
-              marginTop: 14,
-              fontFamily: 'var(--font-ui)',
-            }}
-          >
-            Host keyingi raundni boshlashini kuting...
-          </p>
-        )}
+        {!isHost && <p style={{ color: 'var(--dim)', fontSize: 10, marginTop: 14, fontFamily: 'var(--font-ui)' }}>Host keyingi raundni boshlashini kuting...</p>}
       </motion.div>
     </div>
   );
@@ -2772,15 +2083,9 @@ const BuraRoundOver = memo(function BuraRoundOver({
 
 BuraRoundOver.displayName = 'BuraRoundOver';
 
-// ─── BURA: GAME OVER SCREEN ─────────────────────────────────────
+// ─── BURA: GAME OVER SCREEN ──────────────────────────────────────
 
-const BuraGameOver = memo(function BuraGameOver({
-  gameState,
-  room,
-  socketId,
-  onPlayAgain,
-  onLeave,
-}) {
+const BuraGameOver = memo(function BuraGameOver({ gameState, room, socketId, onPlayAgain, onLeave }) {
   const players = room.players;
   const winner = gameState?.winner;
   const isTeam = room.gameType === '4p';
@@ -2794,33 +2099,16 @@ const BuraGameOver = memo(function BuraGameOver({
   }, [isTeam, winner, socketId, gameState]);
 
   useEffect(() => {
-    if (iWon) {
-      SFX.playVictory();
-      SFX.playWin();
-    } else {
-      SFX.playLose();
-    }
+    if (iWon) { SFX.playVictory(); SFX.playWin(); } else { SFX.playLose(); }
   }, [iWon]);
 
   const sortedPlayers = useMemo(() => {
-    return [...players].sort(
-      (a, b) => (gameState?.penalties?.[a.id] || 0) - (gameState?.penalties?.[b.id] || 0)
-    );
+    return [...players].sort((a, b) => (gameState?.penalties?.[a.id] || 0) - (gameState?.penalties?.[b.id] || 0));
   }, [players, gameState]);
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 100,
-      }}
-    >
+    <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
       <Background />
-
       <motion.div
         initial={{ scale: 0.7, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -2832,9 +2120,7 @@ const BuraGameOver = memo(function BuraGameOver({
           maxWidth: 440,
           width: '90%',
           border: `1px solid ${iWon ? 'rgba(245,200,66,0.35)' : 'rgba(255,45,110,0.25)'}`,
-          boxShadow: `var(--shadow-2xl), 0 0 100px ${
-            iWon ? 'rgba(245,200,66,0.08)' : 'rgba(255,45,110,0.06)'
-          }`,
+          boxShadow: `var(--shadow-2xl), 0 0 100px ${iWon ? 'rgba(245,200,66,0.08)' : 'rgba(255,45,110,0.06)'}`,
           textAlign: 'center',
           zIndex: 1,
           animation: iWon ? 'winner-flash 2s infinite' : 'loser-flash 2s infinite',
@@ -2843,100 +2129,43 @@ const BuraGameOver = memo(function BuraGameOver({
         }}
       >
         <div style={{ fontSize: 64, marginBottom: 16 }}>{iWon ? '🏆' : '💀'}</div>
-        <h2
-          style={{
-            fontFamily: 'var(--font-d)',
-            fontSize: 22,
-            color: iWon ? 'var(--gold)' : 'var(--pink)',
-            textShadow: `0 0 30px ${iWon ? 'var(--gold)' : 'var(--pink)'}`,
-            marginBottom: 8,
-          }}
-        >
+        <h2 style={{
+          fontFamily: 'var(--font-d)',
+          fontSize: 22,
+          color: iWon ? 'var(--gold)' : 'var(--pink)',
+          textShadow: `0 0 30px ${iWon ? 'var(--gold)' : 'var(--pink)'}`,
+          marginBottom: 8,
+        }}>
           {iWon ? "G'ALABA!" : "YUTQAZDINGIZ"}
         </h2>
         <p style={{ color: 'var(--dim)', fontSize: 13, marginBottom: 28 }}>
           {isTeam
-            ? iWon
-              ? 'Sizning jamoangiz g\'alaba qildi!'
-              : 'Raqib jamoa g\'alaba qildi'
-            : iWon
-            ? 'Tabriklaymiz! Siz eng kam jarima yigʻdingiz!'
-            : `${gameState?.winnerNickname || players.find((p) => p.id === winner)?.nickname} gʻalaba qildi!`}
+            ? iWon ? 'Sizning jamoangiz g\'alaba qildi!' : 'Raqib jamoa g\'alaba qildi'
+            : iWon ? 'Tabriklaymiz! Siz eng kam jarima yigʻdingiz!' : `${gameState?.winnerNickname || players.find((p) => p.id === winner)?.nickname} gʻalaba qildi!`}
         </p>
 
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 8,
-            marginBottom: 28,
-          }}
-        >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 28 }}>
           {sortedPlayers.map((player, rank) => {
             const penalty = gameState?.penalties?.[player.id] || 0;
             const isLoser = penalty >= 12;
             return (
-              <div
-                key={player.id}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '12px 16px',
-                  borderRadius: 10,
-                  background:
-                    rank === 0
-                      ? 'rgba(245,200,66,0.08)'
-                      : 'rgba(255,255,255,0.03)',
-                  border: `1px solid ${
-                    rank === 0
-                      ? 'rgba(245,200,66,0.3)'
-                      : isLoser
-                      ? 'rgba(255,45,110,0.3)'
-                      : 'rgba(255,255,255,0.06)'
-                  }`,
-                }}
-              >
+              <div key={player.id} style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '12px 16px',
+                borderRadius: 10,
+                background: rank === 0 ? 'rgba(245,200,66,0.08)' : 'rgba(255,255,255,0.03)',
+                border: `1px solid ${rank === 0 ? 'rgba(245,200,66,0.3)' : isLoser ? 'rgba(255,45,110,0.3)' : 'rgba(255,255,255,0.06)'}`,
+              }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-ui)',
-                      fontSize: 14,
-                      color:
-                        rank === 0
-                          ? 'var(--gold)'
-                          : isLoser
-                          ? 'var(--red)'
-                          : 'var(--dim)',
-                    }}
-                  >
+                  <span style={{ fontFamily: 'var(--font-ui)', fontSize: 14, color: rank === 0 ? 'var(--gold)' : isLoser ? 'var(--red)' : 'var(--dim)' }}>
                     {rank === 0 ? '🥇' : rank === 1 ? '🥈' : rank === 2 ? '🥉' : '💀'}
                   </span>
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-ui)',
-                      fontSize: 12,
-                      color: rank === 0 ? 'var(--gold)' : 'var(--text)',
-                    }}
-                  >
-                    {player.nickname}
-                  </span>
-                  {player.id === socketId && (
-                    <span style={{ fontSize: 9, color: 'var(--cyan)' }}>(sen)</span>
-                  )}
+                  <span style={{ fontFamily: 'var(--font-ui)', fontSize: 12, color: rank === 0 ? 'var(--gold)' : 'var(--text)' }}>{player.nickname}</span>
+                  {player.id === socketId && <span style={{ fontSize: 9, color: 'var(--cyan)' }}>(sen)</span>}
                 </div>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-ui)',
-                    fontSize: 14,
-                    fontWeight: 700,
-                    color: isLoser
-                      ? 'var(--red)'
-                      : rank === 0
-                      ? 'var(--gold)'
-                      : 'var(--text)',
-                  }}
-                >
+                <span style={{ fontFamily: 'var(--font-ui)', fontSize: 14, fontWeight: 700, color: isLoser ? 'var(--red)' : rank === 0 ? 'var(--gold)' : 'var(--text)' }}>
                   {penalty} shtraf
                 </span>
               </div>
@@ -2945,27 +2174,10 @@ const BuraGameOver = memo(function BuraGameOver({
         </div>
 
         <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
-          {room.host === socketId && (
-            <Button color="gold" onClick={onPlayAgain}>
-              🔄 QAYTA O'YNASH
-            </Button>
-          )}
-          <Button color="cyan" onClick={onLeave}>
-            ← BOSH MENU
-          </Button>
+          {room.host === socketId && <Button color="gold" onClick={onPlayAgain}>🔄 QAYTA O'YNASH</Button>}
+          <Button color="cyan" onClick={onLeave}>← BOSH MENU</Button>
         </div>
-        {room.host !== socketId && (
-          <p
-            style={{
-              color: 'var(--dim)',
-              fontSize: 10,
-              marginTop: 14,
-              fontFamily: 'var(--font-ui)',
-            }}
-          >
-            Host qayta boshlashini kuting...
-          </p>
-        )}
+        {room.host !== socketId && <p style={{ color: 'var(--dim)', fontSize: 10, marginTop: 14, fontFamily: 'var(--font-ui)' }}>Host qayta boshlashini kuting...</p>}
       </motion.div>
     </div>
   );
@@ -2973,7 +2185,7 @@ const BuraGameOver = memo(function BuraGameOver({
 
 BuraGameOver.displayName = 'BuraGameOver';
 
-// ─── BURA GAME SCREEN ────────────────────────────────────────────
+// ─── BURA GAME SCREEN ─────────────────────────────────────────────
 
 const BuraScreen = memo(function BuraScreen({
   room,
@@ -3027,25 +2239,22 @@ const BuraScreen = memo(function BuraScreen({
     return new Set();
   }, [myHand, gameState, isMyTurn, isAttacker, isDefender, isPhase2, trumpSuit]);
 
-  const handleCardClick = useCallback(
-    (card) => {
-      if (!playableCardIds.has(card.id)) {
-        setShakeCardId(card.id);
-        SFX.playError();
-        setTimeout(() => setShakeCardId(null), 500);
-        return;
-      }
+  const handleCardClick = useCallback((card) => {
+    if (!playableCardIds.has(card.id)) {
+      setShakeCardId(card.id);
+      SFX.playError();
+      setTimeout(() => setShakeCardId(null), 500);
+      return;
+    }
 
-      if (selectedCard?.id === card.id) {
-        SFX.playCardPlay();
-        onPlayCard(card.id);
-        setSelectedCard(null);
-      } else {
-        setSelectedCard(card);
-      }
-    },
-    [playableCardIds, selectedCard, onPlayCard]
-  );
+    if (selectedCard?.id === card.id) {
+      SFX.playCardPlay();
+      onPlayCard(card.id);
+      setSelectedCard(null);
+    } else {
+      setSelectedCard(card);
+    }
+  }, [playableCardIds, selectedCard, onPlayCard]);
 
   const handleThrowClick = useCallback(() => {
     SFX.playCardThrow();
@@ -3053,52 +2262,29 @@ const BuraScreen = memo(function BuraScreen({
     setSelectedCard(null);
   }, [onThrow]);
 
-  // Round/Game over screens
   if (gameState?.phase === 'roundOver') {
-    return (
-      <BuraRoundOver
-        gameState={gameState}
-        room={room}
-        socketId={socketId}
-        onNextRound={onNextRound}
-        onLeave={onLeave}
-      />
-    );
+    return <BuraRoundOver gameState={gameState} room={room} socketId={socketId} onNextRound={onNextRound} onLeave={onLeave} />;
   }
 
   if (gameState?.phase === 'gameOver') {
-    return (
-      <BuraGameOver
-        gameState={gameState}
-        room={room}
-        socketId={socketId}
-        onPlayAgain={onPlayAgain}
-        onLeave={onLeave}
-      />
-    );
+    return <BuraGameOver gameState={gameState} room={room} socketId={socketId} onPlayAgain={onPlayAgain} onLeave={onLeave} />;
   }
 
-  const getPosition = useCallback(
-    (index) => {
-      const relative = (index - myIndex + players.length) % players.length;
-      if (players.length === 2) return relative === 0 ? 'bottom' : 'top';
-      return ['bottom', 'right', 'top', 'left'][relative] || 'top';
-    },
-    [myIndex, players.length]
-  );
+  const getPosition = useCallback((index) => {
+    const relative = (index - myIndex + players.length) % players.length;
+    if (players.length === 2) return relative === 0 ? 'bottom' : 'top';
+    return ['bottom', 'right', 'top', 'left'][relative] || 'top';
+  }, [myIndex, players.length]);
 
   const renderPenaltyBar = useCallback((penalty) => {
     return Array.from({ length: 12 }, (_, i) => (
-      <div
-        key={i}
-        style={{
-          width: 8,
-          height: 8,
-          borderRadius: 2,
-          background: i < penalty ? 'var(--red)' : 'rgba(255,255,255,0.08)',
-          border: i < penalty ? '1px solid var(--red)' : '1px solid rgba(255,255,255,0.05)',
-        }}
-      />
+      <div key={i} style={{
+        width: 8,
+        height: 8,
+        borderRadius: 2,
+        background: i < penalty ? 'var(--red)' : 'rgba(255,255,255,0.08)',
+        border: i < penalty ? '1px solid var(--red)' : '1px solid rgba(255,255,255,0.05)',
+      }} />
     ));
   }, []);
 
@@ -3106,116 +2292,59 @@ const BuraScreen = memo(function BuraScreen({
   const myScore = gameState?.scores?.[socketId] || 0;
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        zIndex: 20,
-        overflow: 'hidden',
-      }}
-    >
+    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', zIndex: 20, overflow: 'hidden' }}>
       <Background variant="game" />
 
-      <header
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '8px 14px',
-          zIndex: 10,
-          background: 'rgba(2,4,8,0.85)',
-          backdropFilter: 'blur(12px)',
-          borderBottom: '1px solid rgba(0,229,255,0.06)',
-          gap: 8,
-          flexWrap: 'wrap',
-        }}
-      >
+      <header style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '8px 14px',
+        zIndex: 10,
+        background: 'rgba(2,4,8,0.85)',
+        backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid rgba(0,229,255,0.06)',
+        gap: 8,
+        flexWrap: 'wrap',
+      }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           {trumpSuit && (
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 5,
-                padding: '4px 10px',
-                borderRadius: 6,
-                background: 'rgba(245,200,66,0.1)',
-                border: '1px solid rgba(245,200,66,0.25)',
-              }}
-            >
-              <span style={{ color: SUIT_CLR[trumpSuit], fontSize: 18 }}>
-                {SUIT_SYM[trumpSuit]}
-              </span>
-              <span
-                style={{
-                  color: 'var(--gold)',
-                  fontSize: 9,
-                  fontFamily: 'var(--font-ui)',
-                }}
-              >
-                KOZIR
-              </span>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 5,
+              padding: '4px 10px',
+              borderRadius: 6,
+              background: 'rgba(245,200,66,0.1)',
+              border: '1px solid rgba(245,200,66,0.25)',
+            }}>
+              <span style={{ color: SUIT_CLR[trumpSuit], fontSize: 18 }}>{SUIT_SYM[trumpSuit]}</span>
+              <span style={{ color: 'var(--gold)', fontSize: 9, fontFamily: 'var(--font-ui)' }}>KOZIR</span>
             </div>
           )}
-
           {gameState?.deckRemaining > 0 && (
-            <div
-              style={{
-                fontFamily: 'var(--font-ui)',
-                fontSize: 10,
-                color: 'var(--dim)',
-              }}
-            >
-              🃏 {gameState.deckRemaining}
-            </div>
+            <div style={{ fontFamily: 'var(--font-ui)', fontSize: 10, color: 'var(--dim)' }}>🃏 {gameState.deckRemaining}</div>
           )}
-
           {gameState?.teams ? (
             <div style={{ display: 'flex', gap: 6 }}>
-              <div
-                style={{
-                  padding: '4px 8px',
-                  borderRadius: 4,
-                  background: 'rgba(0,229,255,0.07)',
-                  fontFamily: 'var(--font-ui)',
-                  fontSize: 10,
-                  color: 'var(--cyan)',
-                }}
-              >
+              <div style={{ padding: '4px 8px', borderRadius: 4, background: 'rgba(0,229,255,0.07)', fontFamily: 'var(--font-ui)', fontSize: 10, color: 'var(--cyan)' }}>
                 JAMOA 1: {gameState.teamScores?.team1 || 0}pts
               </div>
-              <div
-                style={{
-                  padding: '4px 8px',
-                  borderRadius: 4,
-                  background: 'rgba(255,45,110,0.07)',
-                  fontFamily: 'var(--font-ui)',
-                  fontSize: 10,
-                  color: 'var(--pink)',
-                }}
-              >
+              <div style={{ padding: '4px 8px', borderRadius: 4, background: 'rgba(255,45,110,0.07)', fontFamily: 'var(--font-ui)', fontSize: 10, color: 'var(--pink)' }}>
                 JAMOA 2: {gameState.teamScores?.team2 || 0}pts
               </div>
             </div>
           ) : (
             <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
               {players.map((player) => (
-                <div
-                  key={player.id}
-                  style={{
-                    padding: '3px 8px',
-                    borderRadius: 4,
-                    background:
-                      player.id === socketId
-                        ? 'rgba(0,229,255,0.07)'
-                        : 'rgba(255,255,255,0.03)',
-                    fontFamily: 'var(--font-ui)',
-                    fontSize: 10,
-                    color: player.id === socketId ? 'var(--cyan)' : 'var(--dim)',
-                  }}
-                >
+                <div key={player.id} style={{
+                  padding: '3px 8px',
+                  borderRadius: 4,
+                  background: player.id === socketId ? 'rgba(0,229,255,0.07)' : 'rgba(255,255,255,0.03)',
+                  fontFamily: 'var(--font-ui)',
+                  fontSize: 10,
+                  color: player.id === socketId ? 'var(--cyan)' : 'var(--dim)',
+                }}>
                   {player.nickname.slice(0, 8)}: {gameState?.scores?.[player.id] || 0}pt
                 </div>
               ))}
@@ -3225,66 +2354,27 @@ const BuraScreen = memo(function BuraScreen({
 
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-            <span
-              style={{
-                fontFamily: 'var(--font-ui)',
-                fontSize: 9,
-                color: 'var(--dim)',
-              }}
-            >
-              JARIMA:
-            </span>
-            <div
-              style={{
-                display: 'flex',
-                gap: 2,
-                flexWrap: 'wrap',
-                maxWidth: 120,
-              }}
-            >
-              {renderPenaltyBar(myPenalty)}
-            </div>
-            <span
-              style={{
-                fontFamily: 'var(--font-ui)',
-                fontSize: 10,
-                color: myPenalty >= 9 ? 'var(--red)' : 'var(--dim)',
-              }}
-            >
+            <span style={{ fontFamily: 'var(--font-ui)', fontSize: 9, color: 'var(--dim)' }}>JARIMA:</span>
+            <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap', maxWidth: 120 }}>{renderPenaltyBar(myPenalty)}</div>
+            <span style={{ fontFamily: 'var(--font-ui)', fontSize: 10, color: myPenalty >= 9 ? 'var(--red)' : 'var(--dim)' }}>
               {myPenalty}/12
             </span>
           </div>
-          <Button small color="red" onClick={onLeave}>
-            ✕
-          </Button>
+          <Button small color="red" onClick={onLeave}>✕</Button>
         </div>
       </header>
 
-      <div
-        style={{
-          flex: 1,
-          position: 'relative',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          overflow: 'hidden',
-        }}
-      >
-        <div
-          style={{
-            width: 'min(80vw, 480px)',
-            height: 'min(42vw, 260px)',
-            borderRadius: '50%',
-            background:
-              'radial-gradient(ellipse at center, #1d5c35 0%, #0e3a1e 55%, #071811 100%)',
-            border: '5px solid rgba(255,215,0,0.15)',
-            boxShadow:
-              'inset 0 0 80px rgba(0,0,0,0.6), 0 0 60px rgba(0,80,30,0.15), inset 0 0 40px rgba(0,100,40,0.1)',
-            position: 'absolute',
-          }}
-        />
+      <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+        <div style={{
+          width: 'min(80vw, 480px)',
+          height: 'min(42vw, 260px)',
+          borderRadius: '50%',
+          background: 'radial-gradient(ellipse at center, #1d5c35 0%, #0e3a1e 55%, #071811 100%)',
+          border: '5px solid rgba(255,215,0,0.15)',
+          boxShadow: 'inset 0 0 80px rgba(0,0,0,0.6), 0 0 60px rgba(0,80,30,0.15), inset 0 0 40px rgba(0,100,40,0.1)',
+          position: 'absolute',
+        }} />
 
-        {/* Opponents */}
         {players.map((player, index) => {
           if (player.id === socketId) return null;
           const position = getPosition(index);
@@ -3297,108 +2387,44 @@ const BuraScreen = memo(function BuraScreen({
           const style = POSITION_STYLES[position] || POSITION_STYLES.bottom;
 
           return (
-            <div
-              key={player.id}
-              style={{
-                display: 'flex',
-                gap: 6,
-                zIndex: 5,
-                ...style,
-              }}
-            >
-              <div
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: 8,
-                  textAlign: 'center',
-                  background: isCurrent
-                    ? 'rgba(0,255,148,0.1)'
-                    : 'rgba(255,255,255,0.03)',
-                  border: `1px solid ${
-                    isCurrent
-                      ? 'var(--green)'
-                      : isAtt
-                      ? 'rgba(255,200,66,0.3)'
-                      : isDef
-                      ? 'rgba(0,229,255,0.3)'
-                      : 'rgba(255,255,255,0.06)'
-                  }`,
-                  boxShadow: isCurrent
-                    ? '0 0 20px rgba(0,255,148,0.2)'
-                    : 'none',
-                  minWidth: 80,
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 10.5,
-                    fontFamily: 'var(--font-ui)',
-                    color: isCurrent ? 'var(--green)' : 'var(--text)',
-                    marginBottom: 2,
-                  }}
-                >
+            <div key={player.id} style={{ display: 'flex', gap: 6, zIndex: 5, ...style }}>
+              <div style={{
+                padding: '6px 12px',
+                borderRadius: 8,
+                textAlign: 'center',
+                background: isCurrent ? 'rgba(0,255,148,0.1)' : 'rgba(255,255,255,0.03)',
+                border: `1px solid ${isCurrent ? 'var(--green)' : isAtt ? 'rgba(255,200,66,0.3)' : isDef ? 'rgba(0,229,255,0.3)' : 'rgba(255,255,255,0.06)'}`,
+                boxShadow: isCurrent ? '0 0 20px rgba(0,255,148,0.2)' : 'none',
+                minWidth: 80,
+              }}>
+                <div style={{ fontSize: 10.5, fontFamily: 'var(--font-ui)', color: isCurrent ? 'var(--green)' : 'var(--text)', marginBottom: 2 }}>
                   {player.nickname}
-                  {isAtt && (
-                    <span style={{ color: 'var(--gold)', fontSize: 8 }}> ⚔</span>
-                  )}
-                  {isDef && (
-                    <span style={{ color: 'var(--cyan)', fontSize: 8 }}> 🛡</span>
-                  )}
+                  {isAtt && <span style={{ color: 'var(--gold)', fontSize: 8 }}> ⚔</span>}
+                  {isDef && <span style={{ color: 'var(--cyan)', fontSize: 8 }}> 🛡</span>}
                 </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: 2,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}
-                >
-                  <span style={{ fontSize: 9, color: 'var(--dim)' }}>
-                    🃏×{handSize}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 9,
-                      color: penalty >= 9 ? 'var(--red)' : 'var(--dim)',
-                    }}
-                  >
-                    ⚡{penalty}
-                  </span>
+                <div style={{ display: 'flex', gap: 2, justifyContent: 'center', alignItems: 'center' }}>
+                  <span style={{ fontSize: 9, color: 'var(--dim)' }}>🃏×{handSize}</span>
+                  <span style={{ fontSize: 9, color: penalty >= 9 ? 'var(--red)' : 'var(--dim)' }}>⚡{penalty}</span>
                 </div>
               </div>
-
               <div style={{ display: 'flex' }}>
                 {Array.from({ length: Math.min(handSize, 6) }).map((_, ci) => (
-                  <div
-                    key={ci}
-                    style={{
-                      width: 24,
-                      height: 36,
-                      borderRadius: 4,
-                      marginLeft: ci > 0 ? -10 : 0,
-                      zIndex: ci,
-                      background: 'linear-gradient(135deg, #0a1a3a, #152040)',
-                      border: '1px solid rgba(0,229,255,0.15)',
-                    }}
-                  />
+                  <div key={ci} style={{
+                    width: 24,
+                    height: 36,
+                    borderRadius: 4,
+                    marginLeft: ci > 0 ? -10 : 0,
+                    zIndex: ci,
+                    background: 'linear-gradient(135deg, #0a1a3a, #152040)',
+                    border: '1px solid rgba(0,229,255,0.15)',
+                  }} />
                 ))}
               </div>
             </div>
           );
         })}
 
-        {/* Trick area */}
-        <div
-          style={{
-            position: 'absolute',
-            display: 'flex',
-            gap: 8,
-            zIndex: 6,
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-            maxWidth: 320,
-          }}
-        >
+        <div style={{ position: 'absolute', display: 'flex', gap: 8, zIndex: 6, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 320 }}>
           <div style={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
             <AnimatePresence>
               {(gameState?.attackCards || []).map((card, index) => {
@@ -3412,28 +2438,15 @@ const BuraScreen = memo(function BuraScreen({
                     transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                     style={{ position: 'relative' }}
                   >
-                    <Card
-                      card={card}
-                      small
-                      trump={card.suit === trumpSuit}
-                    />
+                    <Card card={card} small trump={card.suit === trumpSuit} />
                     {defended && (
                       <motion.div
                         initial={{ scale: 0, rotate: 0 }}
                         animate={{ scale: 1, rotate: 12 }}
                         transition={{ delay: 0.1, type: 'spring', stiffness: 300 }}
-                        style={{
-                          position: 'absolute',
-                          top: -4,
-                          left: 4,
-                          zIndex: 1,
-                        }}
+                        style={{ position: 'absolute', top: -4, left: 4, zIndex: 1 }}
                       >
-                        <Card
-                          card={defended}
-                          small
-                          trump={defended.suit === trumpSuit}
-                        />
+                        <Card card={defended} small trump={defended.suit === trumpSuit} />
                       </motion.div>
                     )}
                   </motion.div>
@@ -3443,52 +2456,15 @@ const BuraScreen = memo(function BuraScreen({
           </div>
         </div>
 
-        {/* Trump card indicator */}
         {gameState?.trumpCard && gameState?.deckRemaining > 0 && (
-          <div
-            style={{
-              position: 'absolute',
-              right: '4%',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              zIndex: 5,
-              textAlign: 'center',
-            }}
-          >
-            <div
-              style={{
-                fontSize: 9,
-                color: 'var(--gold)',
-                fontFamily: 'var(--font-ui)',
-                marginBottom: 4,
-              }}
-            >
-              KOZIR KARTI
-            </div>
+          <div style={{ position: 'absolute', right: '4%', top: '50%', transform: 'translateY(-50%)', zIndex: 5, textAlign: 'center' }}>
+            <div style={{ fontSize: 9, color: 'var(--gold)', fontFamily: 'var(--font-ui)', marginBottom: 4 }}>KOZIR KARTI</div>
             <Card card={gameState.trumpCard} small trump />
-            <div
-              style={{
-                fontSize: 9,
-                color: 'var(--dim)',
-                fontFamily: 'var(--font-ui)',
-                marginTop: 3,
-              }}
-            >
-              {gameState.deckRemaining} karta
-            </div>
+            <div style={{ fontSize: 9, color: 'var(--dim)', fontFamily: 'var(--font-ui)', marginTop: 3 }}>{gameState.deckRemaining} karta</div>
           </div>
         )}
 
-        {/* Turn indicator */}
-        <div
-          style={{
-            position: 'absolute',
-            top: 10,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 10,
-          }}
-        >
+        <div style={{ position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)', zIndex: 10 }}>
           <AnimatePresence>
             {isMyTurn ? (
               <motion.div
@@ -3498,175 +2474,63 @@ const BuraScreen = memo(function BuraScreen({
                 style={{
                   padding: '7px 18px',
                   borderRadius: 20,
-                  background: isAttacker
-                    ? 'rgba(245,200,66,0.15)'
-                    : 'rgba(0,229,255,0.12)',
+                  background: isAttacker ? 'rgba(245,200,66,0.15)' : 'rgba(0,229,255,0.12)',
                   border: `1px solid ${isAttacker ? 'var(--gold)' : 'var(--cyan)'}`,
                   color: isAttacker ? 'var(--gold)' : 'var(--cyan)',
                   fontFamily: 'var(--font-ui)',
                   fontSize: 11,
-                  boxShadow: `0 0 25px ${
-                    isAttacker ? 'rgba(245,200,66,0.25)' : 'rgba(0,229,255,0.2)'
-                  }`,
-                  textShadow: `0 0 20px ${
-                    isAttacker ? 'var(--gold)' : 'var(--cyan)'
-                  }`,
+                  boxShadow: `0 0 25px ${isAttacker ? 'rgba(245,200,66,0.25)' : 'rgba(0,229,255,0.2)'}`,
+                  textShadow: `0 0 20px ${isAttacker ? 'var(--gold)' : 'var(--cyan)'}`,
                 }}
               >
                 {isAttacker ? '⚔ HUJUM QILING' : '🛡 HIMOYA QILING'}
               </motion.div>
-            ) : (
-              gameState?.currentPlayer && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  style={{
-                    padding: '6px 14px',
-                    borderRadius: 20,
-                    background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.06)',
-                    color: 'var(--dim)',
-                    fontFamily: 'var(--font-ui)',
-                    fontSize: 10,
-                  }}
-                >
-                  {players.find((p) => p.id === gameState.currentPlayer)?.nickname}{' '}
-                  o'ynamoqda...
-                </motion.div>
-              )
+            ) : gameState?.currentPlayer && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: 20,
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  color: 'var(--dim)',
+                  fontFamily: 'var(--font-ui)',
+                  fontSize: 10,
+                }}
+              >
+                {players.find((p) => p.id === gameState.currentPlayer)?.nickname} o'ynamoqda...
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        {/* Points reminder */}
-        <div
-          style={{
-            position: 'absolute',
-            left: '2%',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            zIndex: 5,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 3,
-          }}
-        >
-          {Object.entries(BURA_POINTS)
-            .filter(([_, value]) => value > 0)
-            .map(([rank, points]) => (
-              <div
-                key={rank}
-                style={{
-                  display: 'flex',
-                  gap: 4,
-                  alignItems: 'center',
-                  padding: '2px 6px',
-                  borderRadius: 4,
-                  background: 'rgba(255,255,255,0.03)',
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: 'var(--font-ui)',
-                    fontSize: 9,
-                    color: 'var(--dim)',
-                    fontWeight: 700,
-                  }}
-                >
-                  {rank}
-                </span>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-ui)',
-                    fontSize: 8,
-                    color: 'var(--dimmer)',
-                  }}
-                >
-                  =
-                </span>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-ui)',
-                    fontSize: 8.5,
-                    color: 'var(--gold)',
-                  }}
-                >
-                  {points}
-                </span>
-              </div>
-            ))}
+        <div style={{ position: 'absolute', left: '2%', top: '50%', transform: 'translateY(-50%)', zIndex: 5, display: 'flex', flexDirection: 'column', gap: 3 }}>
+          {Object.entries(BURA_POINTS).filter(([_, value]) => value > 0).map(([rank, points]) => (
+            <div key={rank} style={{ display: 'flex', gap: 4, alignItems: 'center', padding: '2px 6px', borderRadius: 4, background: 'rgba(255,255,255,0.03)' }}>
+              <span style={{ fontFamily: 'var(--font-ui)', fontSize: 9, color: 'var(--dim)', fontWeight: 700 }}>{rank}</span>
+              <span style={{ fontFamily: 'var(--font-ui)', fontSize: 8, color: 'var(--dimmer)' }}>=</span>
+              <span style={{ fontFamily: 'var(--font-ui)', fontSize: 8.5, color: 'var(--gold)' }}>{points}</span>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Hand area */}
-      <div
-        style={{
-          background: 'rgba(2,4,8,0.92)',
-          backdropFilter: 'blur(14px)',
-          borderTop: '1px solid rgba(0,229,255,0.06)',
-          padding: '10px 8px 18px',
-          zIndex: 10,
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 12,
-            marginBottom: 8,
-          }}
-        >
-          <span
-            style={{
-              fontFamily: 'var(--font-ui)',
-              fontSize: 10,
-              color: isMyTurn
-                ? isAttacker
-                  ? 'var(--gold)'
-                  : 'var(--cyan)'
-                : 'var(--dim)',
-            }}
-          >
-            {nickname}
-            {isAttacker ? ' • ⚔ HUJUMCHI' : isDefender ? ' • 🛡 HIMOYACHI' : ''}
+      <div style={{ background: 'rgba(2,4,8,0.92)', backdropFilter: 'blur(14px)', borderTop: '1px solid rgba(0,229,255,0.06)', padding: '10px 8px 18px', zIndex: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: 8 }}>
+          <span style={{ fontFamily: 'var(--font-ui)', fontSize: 10, color: isMyTurn ? (isAttacker ? 'var(--gold)' : 'var(--cyan)') : 'var(--dim)' }}>
+            {nickname}{isAttacker ? ' • ⚔ HUJUMCHI' : isDefender ? ' • 🛡 HIMOYACHI' : ''}
           </span>
-          <span
-            style={{
-              fontFamily: 'var(--font-ui)',
-              fontSize: 9,
-              color: 'var(--dim)',
-            }}
-          >
+          <span style={{ fontFamily: 'var(--font-ui)', fontSize: 9, color: 'var(--dim)' }}>
             BALL: <span style={{ color: 'var(--text)' }}>{myScore}</span>
           </span>
-          <span
-            style={{
-              fontFamily: 'var(--font-ui)',
-              fontSize: 9,
-              color: myPenalty >= 9 ? 'var(--red)' : 'var(--dim)',
-            }}
-          >
-            JARIMA:{' '}
-            <span style={{ color: myPenalty >= 9 ? 'var(--red)' : 'var(--text)' }}>
-              {myPenalty}
-            </span>
-            /12
+          <span style={{ fontFamily: 'var(--font-ui)', fontSize: 9, color: myPenalty >= 9 ? 'var(--red)' : 'var(--dim)' }}>
+            JARIMA: <span style={{ color: myPenalty >= 9 ? 'var(--red)' : 'var(--text)' }}>{myPenalty}</span>/12
           </span>
         </div>
 
-        <div
-          style={{
-            display: 'flex',
-            gap: 4,
-            justifyContent: 'center',
-            flexWrap: 'nowrap',
-            overflowX: 'auto',
-            paddingTop: 18,
-            paddingBottom: 4,
-          }}
-        >
+        <div style={{ display: 'flex', gap: 4, justifyContent: 'center', flexWrap: 'nowrap', overflowX: 'auto', paddingTop: 18, paddingBottom: 4 }}>
           <AnimatePresence>
             {(myHand || []).map((card, index) => (
               <Card
@@ -3683,37 +2547,19 @@ const BuraScreen = memo(function BuraScreen({
           </AnimatePresence>
         </div>
 
-        <div
-          style={{
-            display: 'flex',
-            gap: 8,
-            justifyContent: 'center',
-            marginTop: 10,
-          }}
-        >
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 10 }}>
           {selectedCard && isMyTurn && playableCardIds.has(selectedCard.id) && (
             <Button
               small
               color={isAttacker ? 'gold' : 'cyan'}
-              onClick={() => {
-                SFX.playCardPlay();
-                onPlayCard(selectedCard.id);
-                setSelectedCard(null);
-              }}
+              onClick={() => { SFX.playCardPlay(); onPlayCard(selectedCard.id); setSelectedCard(null); }}
             >
-              ▶ {selectedCard.rank}
-              {SUIT_SYM[selectedCard.suit]} O'YNASH
+              ▶ {selectedCard.rank}{SUIT_SYM[selectedCard.suit]} O'YNASH
             </Button>
           )}
-
-          {isDefender &&
-            isMyTurn &&
-            isPhase2 === 'defending' &&
-            (gameState?.attackCards || []).length > 0 && (
-              <Button small color="red" onClick={handleThrowClick}>
-                ✕ TASHLAB YUBORISH
-              </Button>
-            )}
+          {isDefender && isMyTurn && isPhase2 === 'defending' && (gameState?.attackCards || []).length > 0 && (
+            <Button small color="red" onClick={handleThrowClick}>✕ TASHLAB YUBORISH</Button>
+          )}
         </div>
       </div>
     </div>
@@ -3761,55 +2607,39 @@ const Game108Screen = memo(function Game108Screen({
     );
   }, [isMyTurn, myHand, gameState, pendingDraw, effectiveSuit]);
 
-  const handleCardClick = useCallback(
-    (card) => {
-      if (!isMyTurn || !playableCardIds.has(card.id)) {
-        SFX.playError();
-        return;
-      }
+  const handleCardClick = useCallback((card) => {
+    if (!isMyTurn || !playableCardIds.has(card.id)) {
+      SFX.playError();
+      return;
+    }
 
-      if (card.rank === 'Q') {
-        setSelectedCard(card);
-        setShowSuitModal(true);
-      } else {
-        SFX.playCardPlay();
-        onPlayCard(card.id, null);
-      }
-    },
-    [isMyTurn, playableCardIds, onPlayCard]
-  );
+    if (card.rank === 'Q') {
+      setSelectedCard(card);
+      setShowSuitModal(true);
+    } else {
+      SFX.playCardPlay();
+      onPlayCard(card.id, null);
+    }
+  }, [isMyTurn, playableCardIds, onPlayCard]);
 
-  const handleSuitSelect = useCallback(
-    (suit) => {
-      if (selectedCard) {
-        SFX.playCardPlay();
-        onPlayCard(selectedCard.id, suit);
-        setShowSuitModal(false);
-        setSelectedCard(null);
-      }
-    },
-    [selectedCard, onPlayCard]
-  );
+  const handleSuitSelect = useCallback((suit) => {
+    if (selectedCard) {
+      SFX.playCardPlay();
+      onPlayCard(selectedCard.id, suit);
+      setShowSuitModal(false);
+      setSelectedCard(null);
+    }
+  }, [selectedCard, onPlayCard]);
 
   const handleDrawClick = useCallback(() => {
     SFX.playCardDraw();
     onDrawCard();
   }, [onDrawCard]);
 
-  // Game over
   if (gameState?.phase === 'gameOver') {
     const iWon = gameState.winner === socketId;
     return (
-      <div
-        style={{
-          position: 'fixed',
-          inset: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 100,
-        }}
-      >
+      <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
         <Background />
         <motion.div
           initial={{ scale: 0.7, opacity: 0 }}
@@ -3828,70 +2658,40 @@ const Game108Screen = memo(function Game108Screen({
           }}
         >
           <div style={{ fontSize: 64, marginBottom: 16 }}>{iWon ? '🏆' : '💀'}</div>
-          <h2
-            style={{
-              fontFamily: 'var(--font-d)',
-              fontSize: 22,
-              color: iWon ? 'var(--green)' : 'var(--pink)',
-              textShadow: `0 0 20px ${iWon ? 'var(--green)' : 'var(--pink)'}`,
-              marginBottom: 8,
-            }}
-          >
+          <h2 style={{
+            fontFamily: 'var(--font-d)',
+            fontSize: 22,
+            color: iWon ? 'var(--green)' : 'var(--pink)',
+            textShadow: `0 0 20px ${iWon ? 'var(--green)' : 'var(--pink)'}`,
+            marginBottom: 8,
+          }}>
             {iWon ? "G'ALABA!" : "YUTQAZDINGIZ"}
           </h2>
           <p style={{ color: 'var(--dim)', marginBottom: 28 }}>
             {gameState.winnerNickname} barcha kartasidan qutulib gʻalaba qildi!
           </p>
-          <div
-            style={{
-              marginBottom: 20,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 8,
-            }}
-          >
+          <div style={{ marginBottom: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
             {room.players.map((player) => (
-              <div
-                key={player.id}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  padding: '10px 14px',
-                  borderRadius: 8,
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.06)',
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: 'var(--font-ui)',
-                    fontSize: 12,
-                    color: player.id === gameState.winner ? 'var(--green)' : 'var(--text)',
-                  }}
-                >
+              <div key={player.id} style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                padding: '10px 14px',
+                borderRadius: 8,
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.06)',
+              }}>
+                <span style={{ fontFamily: 'var(--font-ui)', fontSize: 12, color: player.id === gameState.winner ? 'var(--green)' : 'var(--text)' }}>
                   {player.nickname}
                 </span>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-ui)',
-                    fontSize: 12,
-                    color: 'var(--dim)',
-                  }}
-                >
+                <span style={{ fontFamily: 'var(--font-ui)', fontSize: 12, color: 'var(--dim)' }}>
                   🃏 {gameState.handSizes?.[player.id] || 0} qoldi
                 </span>
               </div>
             ))}
           </div>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
-            {room.host === socketId && (
-              <Button color="green" onClick={onPlayAgain}>
-                🔄 QAYTA
-              </Button>
-            )}
-            <Button color="cyan" onClick={onLeave}>
-              ← MENU
-            </Button>
+            {room.host === socketId && <Button color="green" onClick={onPlayAgain}>🔄 QAYTA</Button>}
+            <Button color="cyan" onClick={onLeave}>← MENU</Button>
           </div>
         </motion.div>
       </div>
@@ -3899,19 +2699,9 @@ const Game108Screen = memo(function Game108Screen({
   }
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        zIndex: 20,
-        overflow: 'hidden',
-      }}
-    >
+    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', zIndex: 20, overflow: 'hidden' }}>
       <Background variant="game" />
 
-      {/* Suit Modal */}
       <AnimatePresence>
         {showSuitModal && (
           <motion.div
@@ -3942,16 +2732,7 @@ const Game108Screen = memo(function Game108Screen({
                 width: '90%',
               }}
             >
-              <h3
-                style={{
-                  fontFamily: 'var(--font-d)',
-                  fontSize: 16,
-                  color: 'var(--gold)',
-                  marginBottom: 20,
-                }}
-              >
-                SUIT TANLANG (QUEEN)
-              </h3>
+              <h3 style={{ fontFamily: 'var(--font-d)', fontSize: 16, color: 'var(--gold)', marginBottom: 20 }}>SUIT TANLANG (QUEEN)</h3>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 {SUIT_ORDER.map((suit) => (
                   <motion.button
@@ -3974,14 +2755,7 @@ const Game108Screen = memo(function Game108Screen({
                     }}
                   >
                     <span>{SUIT_SYM[suit]}</span>
-                    <span
-                      style={{
-                        fontSize: 10,
-                        fontFamily: 'var(--font-ui)',
-                      }}
-                    >
-                      {SUIT_LBL[suit]}
-                    </span>
+                    <span style={{ fontSize: 10, fontFamily: 'var(--font-ui)' }}>{SUIT_LBL[suit]}</span>
                   </motion.button>
                 ))}
               </div>
@@ -3990,73 +2764,41 @@ const Game108Screen = memo(function Game108Screen({
         )}
       </AnimatePresence>
 
-      <header
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '8px 14px',
-          zIndex: 10,
-          background: 'rgba(2,4,8,0.85)',
-          backdropFilter: 'blur(12px)',
-          borderBottom: '1px solid rgba(0,229,255,0.06)',
-          flexWrap: 'wrap',
-          gap: 6,
-        }}
-      >
+      <header style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '8px 14px',
+        zIndex: 10,
+        background: 'rgba(2,4,8,0.85)',
+        backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid rgba(0,229,255,0.06)',
+        flexWrap: 'wrap',
+        gap: 6,
+      }}>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {room.players.map((player) => {
             const isCurrent = gameState?.currentPlayer === player.id;
             return (
-              <div
-                key={player.id}
-                style={{
-                  padding: '4px 9px',
-                  borderRadius: 5,
-                  background: isCurrent
-                    ? 'rgba(0,255,148,0.1)'
-                    : 'rgba(255,255,255,0.03)',
-                  border: `1px solid ${
-                    isCurrent ? 'var(--green)' : 'rgba(255,255,255,0.06)'
-                  }`,
-                  fontFamily: 'var(--font-ui)',
-                  fontSize: 10,
-                  color: isCurrent
-                    ? 'var(--green)'
-                    : player.id === socketId
-                    ? 'var(--cyan)'
-                    : 'var(--dim)',
-                }}
-              >
+              <div key={player.id} style={{
+                padding: '4px 9px',
+                borderRadius: 5,
+                background: isCurrent ? 'rgba(0,255,148,0.1)' : 'rgba(255,255,255,0.03)',
+                border: `1px solid ${isCurrent ? 'var(--green)' : 'rgba(255,255,255,0.06)'}`,
+                fontFamily: 'var(--font-ui)',
+                fontSize: 10,
+                color: isCurrent ? 'var(--green)' : player.id === socketId ? 'var(--cyan)' : 'var(--dim)',
+              }}>
                 {player.nickname.slice(0, 8)} 🃏{gameState?.handSizes?.[player.id] || 0}
               </div>
             );
           })}
         </div>
-        <Button small color="red" onClick={onLeave}>
-          ✕
-        </Button>
+        <Button small color="red" onClick={onLeave}>✕</Button>
       </header>
 
-      <div
-        style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          position: 'relative',
-          zIndex: 1,
-          gap: 12,
-        }}
-      >
-        <div
-          style={{
-            fontFamily: 'var(--font-ui)',
-            fontSize: 11,
-            color: 'var(--cyan)',
-          }}
-        >
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', zIndex: 1, gap: 12 }}>
+        <div style={{ fontFamily: 'var(--font-ui)', fontSize: 11, color: 'var(--cyan)' }}>
           {gameState?.direction === 1 ? '↻ Soat yo\'nalishi' : '↺ Teskari yo\'nalish'}
         </div>
 
@@ -4081,33 +2823,20 @@ const Game108Screen = memo(function Game108Screen({
 
         <div style={{ display: 'flex', gap: 36, alignItems: 'center' }}>
           <div style={{ textAlign: 'center' }}>
-            <div
-              style={{
-                fontSize: 9,
-                color: 'var(--dim)',
-                fontFamily: 'var(--font-ui)',
-                marginBottom: 6,
-              }}
-            >
+            <div style={{ fontSize: 9, color: 'var(--dim)', fontFamily: 'var(--font-ui)', marginBottom: 6 }}>
               DAST ({gameState?.drawPileCount || 0})
             </div>
             <motion.div
               whileHover={isMyTurn ? { scale: 1.06 } : {}}
               whileTap={isMyTurn ? { scale: 0.94 } : {}}
               onClick={isMyTurn ? handleDrawClick : undefined}
-              style={{
-                cursor: isMyTurn ? 'pointer' : 'default',
-              }}
+              style={{ cursor: isMyTurn ? 'pointer' : 'default' }}
             >
               <Card faceDown />
             </motion.div>
             {isMyTurn && (
               <div style={{ marginTop: 8 }}>
-                <Button
-                  small
-                  color="cyan"
-                  onClick={handleDrawClick}
-                >
+                <Button small color="cyan" onClick={handleDrawClick}>
                   {pendingDraw > 0 ? `+${pendingDraw} KARTA AL` : 'KARTA OLISH'}
                 </Button>
               </div>
@@ -4115,17 +2844,8 @@ const Game108Screen = memo(function Game108Screen({
           </div>
 
           <div style={{ textAlign: 'center' }}>
-            <div
-              style={{
-                fontSize: 9,
-                color: 'var(--dim)',
-                fontFamily: 'var(--font-ui)',
-                marginBottom: 6,
-              }}
-            >
-              TASHLANGAN{' '}
-              {gameState?.suitRequest &&
-                `(${SUIT_LBL[gameState.suitRequest]} ZAKAZ)`}
+            <div style={{ fontSize: 9, color: 'var(--dim)', fontFamily: 'var(--font-ui)', marginBottom: 6 }}>
+              TASHLANGAN {gameState?.suitRequest && `(${SUIT_LBL[gameState.suitRequest]} ZAKAZ)`}
             </div>
             <AnimatePresence mode="wait">
               {topCard && (
@@ -4141,13 +2861,7 @@ const Game108Screen = memo(function Game108Screen({
               )}
             </AnimatePresence>
             {effectiveSuit && (
-              <div
-                style={{
-                  marginTop: 6,
-                  fontSize: 22,
-                  color: SUIT_CLR[effectiveSuit],
-                }}
-              >
+              <div style={{ marginTop: 6, fontSize: 22, color: SUIT_CLR[effectiveSuit] }}>
                 {SUIT_SYM[effectiveSuit]}
               </div>
             )}
@@ -4174,37 +2888,11 @@ const Game108Screen = memo(function Game108Screen({
         )}
       </div>
 
-      <div
-        style={{
-          background: 'rgba(2,4,8,0.92)',
-          backdropFilter: 'blur(14px)',
-          borderTop: '1px solid rgba(0,229,255,0.06)',
-          padding: '10px 6px 16px',
-          zIndex: 10,
-        }}
-      >
-        <div
-          style={{
-            textAlign: 'center',
-            marginBottom: 6,
-            fontFamily: 'var(--font-ui)',
-            fontSize: 9,
-            color: 'var(--dim)',
-          }}
-        >
+      <div style={{ background: 'rgba(2,4,8,0.92)', backdropFilter: 'blur(14px)', borderTop: '1px solid rgba(0,229,255,0.06)', padding: '10px 6px 16px', zIndex: 10 }}>
+        <div style={{ textAlign: 'center', marginBottom: 6, fontFamily: 'var(--font-ui)', fontSize: 9, color: 'var(--dim)' }}>
           {nickname} • {myHand?.length || 0} karta
         </div>
-        <div
-          style={{
-            display: 'flex',
-            gap: 3,
-            justifyContent: 'center',
-            flexWrap: 'nowrap',
-            overflowX: 'auto',
-            paddingTop: 14,
-            paddingBottom: 4,
-          }}
-        >
+        <div style={{ display: 'flex', gap: 3, justifyContent: 'center', flexWrap: 'nowrap', overflowX: 'auto', paddingTop: 14, paddingBottom: 4 }}>
           {(myHand || []).map((card, index) => (
             <Card
               key={card.id}
@@ -4223,16 +2911,13 @@ const Game108Screen = memo(function Game108Screen({
 
 Game108Screen.displayName = 'Game108Screen';
 
-// ─── MAIN APP COMPONENT ──────────────────────────────────────────
+// ─── MAIN APP ─────────────────────────────────────────────────────
 
 export default function App() {
-  // ─── State ──────────────────────────────────────────────────────
   const [state, dispatch] = useReducer(appReducer, APP_INITIAL_STATE);
   const socketRef = useRef(null);
-  const reconnectTimerRef = useRef(null);
   const typingTimeoutsRef = useRef({});
 
-  // ─── Selectors ──────────────────────────────────────────────────
   const {
     screen,
     nickname,
@@ -4248,7 +2933,6 @@ export default function App() {
     isConnecting,
   } = state;
 
-  // ─── Toast System ──────────────────────────────────────────────
   const addToast = useCallback((message, type = 'info') => {
     const id = Date.now() + Math.random();
     dispatch({ type: 'ADD_TOAST', payload: { id, msg: message, type } });
@@ -4261,7 +2945,6 @@ export default function App() {
     dispatch({ type: 'REMOVE_TOAST', payload: id });
   }, []);
 
-  // ─── Socket Setup ──────────────────────────────────────────────
   useEffect(() => {
     const socket = getSocketInstance();
     socketRef.current = socket;
@@ -4270,7 +2953,7 @@ export default function App() {
       dispatch({ type: 'SET_ONLINE', payload: true });
       dispatch({ type: 'SET_CONNECTING', payload: false });
       dispatch({ type: 'RESET_CONNECTION_ATTEMPTS' });
-      setSocketId(socket.id);
+      dispatch({ type: 'SET_SOCKET_ID', payload: socket.id });
       const saved = localStorage.getItem('karta_nick');
       if (saved) {
         socket.emit('register', { nickname: saved });
@@ -4279,9 +2962,7 @@ export default function App() {
 
     const handleDisconnect = (reason) => {
       dispatch({ type: 'SET_ONLINE', payload: false });
-      if (reason === 'io client disconnect') {
-        return;
-      }
+      if (reason === 'io client disconnect') return;
       addToast('Ulanish uzildi. Qayta ulanmoqda...', 'error');
       dispatch({ type: 'INCREMENT_CONNECTION_ATTEMPTS' });
     };
@@ -4299,7 +2980,6 @@ export default function App() {
       addToast('Serverga ulanish amalga oshmadi. Iltimos, keyinroq qayta urinib koʻring.', 'error');
     };
 
-    // ─── Socket Event Handlers ──────────────────────────────────
     const onRegistered = ({ nickname: nick }) => {
       dispatch({ type: 'SET_NICKNAME', payload: nick });
       if (screen === 'login') {
@@ -4413,10 +3093,7 @@ export default function App() {
       dispatch({ type: 'SET_TYPING_USERS', payload: [...new Set([...typingUsers, nick])] });
       clearTimeout(typingTimeoutsRef.current[nick]);
       typingTimeoutsRef.current[nick] = setTimeout(() => {
-        dispatch({
-          type: 'SET_TYPING_USERS',
-          payload: typingUsers.filter((u) => u !== nick),
-        });
+        dispatch({ type: 'SET_TYPING_USERS', payload: typingUsers.filter((u) => u !== nick) });
       }, 2000);
     };
 
@@ -4429,15 +3106,12 @@ export default function App() {
         dispatch({ type: 'SET_GAME_STATE', payload: restoredState.public });
       }
       dispatch({ type: 'SET_CHATS', payload: updatedRoom.chat || [] });
-      const targetScreen = updatedRoom.status === 'playing'
-        ? updatedRoom.gameMode
-        : 'lobby';
+      const targetScreen = updatedRoom.status === 'playing' ? updatedRoom.gameMode : 'lobby';
       dispatch({ type: 'SET_SCREEN', payload: targetScreen });
       addToast('Xonaga qayta ulandi!', 'success');
       SFX.playNotification();
     };
 
-    // ─── Register Events ──────────────────────────────────────────
     socket.on('connect', handleConnect);
     socket.on('disconnect', handleDisconnect);
     socket.on('connect_error', handleConnectError);
@@ -4464,13 +3138,10 @@ export default function App() {
     socket.on('typing', onTyping);
     socket.on('reconnected', onReconnected);
 
-    // ─── Connect ──────────────────────────────────────────────────
     socket.connect();
     dispatch({ type: 'SET_CONNECTING', payload: true });
 
-    // ─── Cleanup ──────────────────────────────────────────────────
     return () => {
-      clearTimeout(reconnectTimerRef.current);
       Object.values(typingTimeoutsRef.current).forEach(clearTimeout);
       socket.off('connect', handleConnect);
       socket.off('disconnect', handleDisconnect);
@@ -4501,19 +3172,15 @@ export default function App() {
         socket.disconnect();
       }
     };
-  }, []); // Empty deps - runs once
+  }, []);
 
-  // ─── Handlers ──────────────────────────────────────────────────
-  const handleLogin = useCallback(
-    (nick) => {
-      dispatch({ type: 'SET_NICKNAME', payload: nick });
-      if (socketRef.current) {
-        socketRef.current.emit('register', { nickname: nick });
-      }
-      dispatch({ type: 'SET_SCREEN', payload: 'menu' });
-    },
-    []
-  );
+  const handleLogin = useCallback((nick) => {
+    dispatch({ type: 'SET_NICKNAME', payload: nick });
+    if (socketRef.current) {
+      socketRef.current.emit('register', { nickname: nick });
+    }
+    dispatch({ type: 'SET_SCREEN', payload: 'menu' });
+  }, []);
 
   const handleLogout = useCallback(() => {
     localStorage.removeItem('karta_nick');
@@ -4529,23 +3196,17 @@ export default function App() {
     dispatch({ type: 'SET_SCREEN', payload: 'select' });
   }, []);
 
-  const handleCreateRoom = useCallback(
-    ({ gameMode, gameType, deckCount }) => {
-      if (socketRef.current) {
-        socketRef.current.emit('createRoom', { gameMode, gameType, deckCount });
-      }
-    },
-    []
-  );
+  const handleCreateRoom = useCallback(({ gameMode, gameType, deckCount }) => {
+    if (socketRef.current) {
+      socketRef.current.emit('createRoom', { gameMode, gameType, deckCount });
+    }
+  }, []);
 
-  const handleJoinRoom = useCallback(
-    (roomId) => {
-      if (socketRef.current) {
-        socketRef.current.emit('joinRoom', { roomId: roomId.trim() });
-      }
-    },
-    []
-  );
+  const handleJoinRoom = useCallback((roomId) => {
+    if (socketRef.current) {
+      socketRef.current.emit('joinRoom', { roomId: roomId.trim() });
+    }
+  }, []);
 
   const handleLeaveRoom = useCallback(() => {
     if (socketRef.current && room?.id) {
@@ -4567,23 +3228,17 @@ export default function App() {
     }
   }, [room]);
 
-  const handleSendChat = useCallback(
-    (text) => {
-      if (socketRef.current && room?.id) {
-        socketRef.current.emit('chatMessage', { roomId: room.id, text });
-      }
-    },
-    [room]
-  );
+  const handleSendChat = useCallback((text) => {
+    if (socketRef.current && room?.id) {
+      socketRef.current.emit('chatMessage', { roomId: room.id, text });
+    }
+  }, [room]);
 
-  const handleBuraPlay = useCallback(
-    (cardId) => {
-      if (socketRef.current && room?.id) {
-        socketRef.current.emit('buraPlayCard', { roomId: room.id, cardId });
-      }
-    },
-    [room]
-  );
+  const handleBuraPlay = useCallback((cardId) => {
+    if (socketRef.current && room?.id) {
+      socketRef.current.emit('buraPlayCard', { roomId: room.id, cardId });
+    }
+  }, [room]);
 
   const handleBuraThrow = useCallback(() => {
     if (socketRef.current && room?.id) {
@@ -4591,14 +3246,11 @@ export default function App() {
     }
   }, [room]);
 
-  const handle108Play = useCallback(
-    (cardId, chosenSuit) => {
-      if (socketRef.current && room?.id) {
-        socketRef.current.emit('108PlayCard', { roomId: room.id, cardId, chosenSuit });
-      }
-    },
-    [room]
-  );
+  const handle108Play = useCallback((cardId, chosenSuit) => {
+    if (socketRef.current && room?.id) {
+      socketRef.current.emit('108PlayCard', { roomId: room.id, cardId, chosenSuit });
+    }
+  }, [room]);
 
   const handle108Draw = useCallback(() => {
     if (socketRef.current && room?.id) {
@@ -4618,52 +3270,36 @@ export default function App() {
     }
   }, [room]);
 
-  // ─── Render ─────────────────────────────────────────────────────
   return (
-    <div
-      style={{
-        width: '100%',
-        height: '100%',
+    <div style={{ width: '100%', height: '100%', position: 'fixed', inset: 0, overflow: 'hidden' }}>
+      <div style={{
         position: 'fixed',
-        inset: 0,
-        overflow: 'hidden',
-      }}
-    >
-      {/* Online Status Indicator */}
-      <div
-        style={{
-          position: 'fixed',
-          bottom: 12,
-          left: 12,
-          zIndex: 9999,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 5,
-          padding: '4px 10px',
-          borderRadius: 20,
-          background: 'rgba(0,0,0,0.6)',
-          backdropFilter: 'blur(8px)',
-          border: `1px solid ${isOnline ? 'rgba(0,255,148,0.25)' : 'rgba(255,45,110,0.25)'}`,
-          pointerEvents: 'none',
-        }}
-      >
-        <div
-          style={{
-            width: 6,
-            height: 6,
-            borderRadius: '50%',
-            background: isOnline ? 'var(--green)' : 'var(--pink)',
-            boxShadow: `0 0 8px ${isOnline ? 'var(--green)' : 'var(--pink)'}`,
-          }}
-        />
-        <span
-          style={{
-            fontSize: 8.5,
-            fontFamily: 'var(--font-ui)',
-            color: isOnline ? 'var(--dim)' : 'var(--pink)',
-            letterSpacing: '0.1em',
-          }}
-        >
+        bottom: 12,
+        left: 12,
+        zIndex: 9999,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 5,
+        padding: '4px 10px',
+        borderRadius: 20,
+        background: 'rgba(0,0,0,0.6)',
+        backdropFilter: 'blur(8px)',
+        border: `1px solid ${isOnline ? 'rgba(0,255,148,0.25)' : 'rgba(255,45,110,0.25)'}`,
+        pointerEvents: 'none',
+      }}>
+        <div style={{
+          width: 6,
+          height: 6,
+          borderRadius: '50%',
+          background: isOnline ? 'var(--green)' : 'var(--pink)',
+          boxShadow: `0 0 8px ${isOnline ? 'var(--green)' : 'var(--pink)'}`,
+        }} />
+        <span style={{
+          fontSize: 8.5,
+          fontFamily: 'var(--font-ui)',
+          color: isOnline ? 'var(--dim)' : 'var(--pink)',
+          letterSpacing: '0.1em',
+        }}>
           {isOnline ? 'ONLINE' : isConnecting ? 'ULANMOQDA...' : 'OFFLINE'}
         </span>
       </div>
@@ -4672,58 +3308,25 @@ export default function App() {
 
       <AnimatePresence mode="wait">
         {screen === 'login' && (
-          <motion.div
-            key="login"
-            style={{ position: 'fixed', inset: 0 }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
+          <motion.div key="login" style={{ position: 'fixed', inset: 0 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <LoginScreen onLogin={handleLogin} />
           </motion.div>
         )}
 
         {screen === 'menu' && (
-          <motion.div
-            key="menu"
-            style={{ position: 'fixed', inset: 0 }}
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -30 }}
-          >
-            <MenuScreen
-              nickname={nickname}
-              onSelectGame={handleSelectGame}
-              onLogout={handleLogout}
-            />
+          <motion.div key="menu" style={{ position: 'fixed', inset: 0 }} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }}>
+            <MenuScreen nickname={nickname} onSelectGame={handleSelectGame} onLogout={handleLogout} />
           </motion.div>
         )}
 
         {screen === 'select' && (
-          <motion.div
-            key="select"
-            style={{ position: 'fixed', inset: 0 }}
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -30 }}
-          >
-            <SelectScreen
-              gameMode={selectedGame}
-              onBack={() => dispatch({ type: 'SET_SCREEN', payload: 'menu' })}
-              onCreate={handleCreateRoom}
-              onJoin={handleJoinRoom}
-            />
+          <motion.div key="select" style={{ position: 'fixed', inset: 0 }} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }}>
+            <SelectScreen gameMode={selectedGame} onBack={() => dispatch({ type: 'SET_SCREEN', payload: 'menu' })} onCreate={handleCreateRoom} onJoin={handleJoinRoom} />
           </motion.div>
         )}
 
         {screen === 'lobby' && room && (
-          <motion.div
-            key="lobby"
-            style={{ position: 'fixed', inset: 0 }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
+          <motion.div key="lobby" style={{ position: 'fixed', inset: 0 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <LobbyScreen
               room={room}
               nickname={nickname}
@@ -4739,13 +3342,7 @@ export default function App() {
         )}
 
         {screen === 'bura' && room && (
-          <motion.div
-            key="bura"
-            style={{ position: 'fixed', inset: 0 }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
+          <motion.div key="bura" style={{ position: 'fixed', inset: 0 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <BuraScreen
               room={room}
               gameState={gameState}
@@ -4762,13 +3359,7 @@ export default function App() {
         )}
 
         {screen === '108' && room && (
-          <motion.div
-            key="108"
-            style={{ position: 'fixed', inset: 0 }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
+          <motion.div key="108" style={{ position: 'fixed', inset: 0 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <Game108Screen
               room={room}
               gameState={gameState}
