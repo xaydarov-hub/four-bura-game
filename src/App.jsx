@@ -129,9 +129,18 @@ if (typeof document !== 'undefined') {
 
 // ─── SOCKET SINGLETON ────────────────────────────────────────────
 let _socket = null;
+let _socketListeners = new Set();
+
 function getSocket() {
   if (!_socket) {
-    _socket = io(SERVER_URL, { autoConnect: false, reconnection: true, reconnectionAttempts: 8, reconnectionDelay: 1000 });
+    _socket = io(SERVER_URL, { 
+      autoConnect: false, 
+      reconnection: true, 
+      reconnectionAttempts: 8, 
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      timeout: 10000,
+    });
   }
   return _socket;
 }
@@ -685,19 +694,20 @@ function LobbyScreen({ room, nickname, socketId, onStart, onLeave, onToggleReady
 
   useEffect(() => { chatRef.current?.scrollIntoView({behavior:'smooth'}); }, [chats]);
 
-  function copyCode() {
+  const copyCode = useCallback(() => {
     navigator.clipboard.writeText(room.id).catch(()=>{});
     setCopied(true);
     setTimeout(()=>setCopied(false), 2000);
-  }
-  function send() {
+  }, [room.id]);
+
+  const send = useCallback(() => {
     if (!msg.trim()) return;
     onSendChat(msg.trim());
     setMsg('');
-  }
+  }, [msg, onSendChat]);
 
-  const avatarColor = (nick) => `hsl(${nick.charCodeAt(0)*13%360},55%,28%)`;
-  const avatarBorder= (nick) => `hsl(${nick.charCodeAt(0)*13%360},75%,50%)`;
+  const avatarColor = useCallback((nick) => `hsl(${nick.charCodeAt(0)*13%360},55%,28%)`, []);
+  const avatarBorder = useCallback((nick) => `hsl(${nick.charCodeAt(0)*13%360},75%,50%)`, []);
 
   return (
     <div style={{ position:'fixed', inset:0, display:'flex', flexDirection:'column', zIndex:20 }}>
@@ -840,7 +850,7 @@ function BuraScreen({ room, gs, myHand, socketId, nickname, onPlay, onThrow, onL
       return new Set(myHand.map(c => c.id));
     }
     if (phase2 === 'defending' && isDefender) {
-      const lastAttack = gs.attackCards[gs.attackCards.length - 1];
+      const lastAttack = gs.attackCards?.[gs.attackCards.length - 1];
       if (!lastAttack) return new Set();
       return new Set(myHand.filter(c => {
         if (c.suit === lastAttack.suit) {
@@ -853,7 +863,7 @@ function BuraScreen({ room, gs, myHand, socketId, nickname, onPlay, onThrow, onL
     return new Set();
   }, [myHand, gs, isMyTurn, isAttacker, isDefender, phase2, trump]);
 
-  function handleCardClick(card) {
+  const handleCardClick = useCallback((card) => {
     if (!playable.has(card.id)) {
       setShakeCard(card.id);
       SFX.error();
@@ -867,28 +877,16 @@ function BuraScreen({ room, gs, myHand, socketId, nickname, onPlay, onThrow, onL
     } else {
       setSelected(card);
     }
-  }
+  }, [playable, selected, onPlay]);
 
-  function handleThrow() {
+  const handleThrowClick = useCallback(() => {
     SFX.throw_();
     onThrow();
     setSelected(null);
-  }
+  }, [onThrow]);
 
-  if (gs?.phase === 'roundOver') {
-    return <BuraRoundOver gs={gs} room={room} socketId={socketId} onNext={onNextRound} onLeave={onLeave}/>;
-  }
-  if (gs?.phase === 'gameOver') {
-    return <BuraGameOver gs={gs} room={room} socketId={socketId} onPlayAgain={onPlayAgain} onLeave={onLeave}/>;
-  }
-
-  const getPos = (idx) => {
-    const rel = (idx - myIdx + players.length) % players.length;
-    if (players.length === 2) return rel === 0 ? 'bottom' : 'top';
-    return ['bottom','right','top','left'][rel] || 'top';
-  };
-
-  const penaltyBar = (pen) => {
+  const penaltyBars = useMemo(() => {
+    const pen = gs?.penalties?.[socketId] || 0;
     const bars = [];
     for (let i = 0; i < 12; i++) {
       bars.push(
@@ -900,7 +898,20 @@ function BuraScreen({ room, gs, myHand, socketId, nickname, onPlay, onThrow, onL
       );
     }
     return bars;
-  };
+  }, [gs, socketId]);
+
+  const getPosition = useCallback((idx) => {
+    const rel = (idx - myIdx + players.length) % players.length;
+    if (players.length === 2) return rel === 0 ? 'bottom' : 'top';
+    return ['bottom','right','top','left'][rel] || 'top';
+  }, [myIdx, players.length]);
+
+  if (gs?.phase === 'roundOver') {
+    return <BuraRoundOver gs={gs} room={room} socketId={socketId} onNext={onNextRound} onLeave={onLeave}/>;
+  }
+  if (gs?.phase === 'gameOver') {
+    return <BuraGameOver gs={gs} room={room} socketId={socketId} onPlayAgain={onPlayAgain} onLeave={onLeave}/>;
+  }
 
   const myPenalty = gs?.penalties?.[socketId] || 0;
   const myScore   = gs?.scores?.[socketId] || 0;
@@ -915,7 +926,7 @@ function BuraScreen({ room, gs, myHand, socketId, nickname, onPlay, onThrow, onL
         background:'rgba(2,4,8,0.82)', backdropFilter:'blur(12px)',
         borderBottom:'1px solid rgba(0,229,255,0.07)',
       }}>
-        <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:10, flexWrap:'wrap' }}>
           {trump && (
             <div style={{
               display:'flex', alignItems:'center', gap:5,
@@ -932,7 +943,7 @@ function BuraScreen({ room, gs, myHand, socketId, nickname, onPlay, onThrow, onL
             </div>
           )}
           {gs?.teams ? (
-            <div style={{ display:'flex', gap:6 }}>
+            <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
               <div style={{ padding:'4px 8px', borderRadius:4, background:'rgba(0,229,255,0.07)', fontFamily:'var(--font-ui)', fontSize:10, color:'var(--cyan)' }}>
                 JAMOA 1: {gs.teamScores?.team1||0}pts
               </div>
@@ -941,7 +952,7 @@ function BuraScreen({ room, gs, myHand, socketId, nickname, onPlay, onThrow, onL
               </div>
             </div>
           ) : (
-            <div style={{ display:'flex', gap:5 }}>
+            <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
               {players.map(p => (
                 <div key={p.id} style={{
                   padding:'4px 8px', borderRadius:4,
@@ -955,10 +966,10 @@ function BuraScreen({ room, gs, myHand, socketId, nickname, onPlay, onThrow, onL
             </div>
           )}
         </div>
-        <div style={{ display:'flex', gap:8 }}>
+        <div style={{ display:'flex', gap:8, alignItems:'center' }}>
           <div style={{ display:'flex', alignItems:'center', gap:5 }}>
             <span style={{ fontFamily:'var(--font-ui)', fontSize:9, color:'var(--dim)' }}>JARIMA:</span>
-            <div style={{ display:'flex', gap:2, flexWrap:'wrap', maxWidth:120 }}>{penaltyBar(myPenalty)}</div>
+            <div style={{ display:'flex', gap:2, flexWrap:'wrap', maxWidth:120 }}>{penaltyBars}</div>
             <span style={{ fontFamily:'var(--font-ui)', fontSize:10, color: myPenalty >= 9 ? 'var(--red)' : 'var(--dim)' }}>
               {myPenalty}/12
             </span>
@@ -980,7 +991,7 @@ function BuraScreen({ room, gs, myHand, socketId, nickname, onPlay, onThrow, onL
 
         {players.map((p, i) => {
           if (p.id === socketId) return null;
-          const pos = getPos(i);
+          const pos = getPosition(i);
           const isCurrent = gs?.currentPlayer === p.id;
           const isAtt = gs?.attackerId === p.id;
           const isDef = gs?.defenderId === p.id;
@@ -1156,7 +1167,7 @@ function BuraScreen({ room, gs, myHand, socketId, nickname, onPlay, onThrow, onL
             </Btn>
           )}
           {isDefender && isMyTurn && phase2 === 'defending' && (gs?.attackCards||[]).length > 0 && (
-            <Btn small color="red" onClick={handleThrow}>
+            <Btn small color="red" onClick={handleThrowClick}>
               ✕ TASHLAB YUBORISH
             </Btn>
           )}
@@ -1198,7 +1209,7 @@ function BuraRoundOver({ gs, room, socketId, onNext, onLeave }) {
           <div style={{ fontFamily:'var(--font-ui)', fontSize:9, color:'var(--dim)', marginBottom:8, letterSpacing:'.1em' }}>JARIMA QOIDASI</div>
           <div style={{ display:'flex', gap:6, justifyContent:'center', flexWrap:'wrap' }}>
             {[['61-120','0 shtraf','green'],['32-60','2 shtraf','cyan'],['1-31','4 shtraf','gold'],['0','6 shtraf','red']].map(([r,l,c]) => (
-              <div key={r} style={{ padding:'4px 8px', borderRadius:4, background:`rgba(255,255,255,0.03)`, border:`1px solid rgba(255,255,255,0.07)`, fontSize:9, fontFamily:'var(--font-ui)', color:`var(--${c})` }}>
+              <div key={r} style={{ padding:'4px 8px', borderRadius:4, background:'rgba(255,255,255,0.03)', border:`1px solid rgba(255,255,255,0.07)`, fontSize:9, fontFamily:'var(--font-ui)', color:`var(--${c})` }}>
                 {r}: {l}
               </div>
             ))}
@@ -1260,9 +1271,9 @@ function BuraGameOver({ gs, room, socketId, onPlayAgain, onLeave }) {
     iWon = winner === socketId;
   }
 
-  useEffect(() => { if (iWon) SFX.win(); else SFX.error(); }, []);
+  useEffect(() => { if (iWon) SFX.win(); else SFX.error(); }, [iWon]);
 
-  const sorted = [...players].sort((a,b) => (gs?.penalties?.[a.id]||0) - (gs?.penalties?.[b.id]||0));
+  const sorted = useMemo(() => [...players].sort((a,b) => (gs?.penalties?.[a.id]||0) - (gs?.penalties?.[b.id]||0)), [players, gs]);
 
   return (
     <div style={{ position:'fixed', inset:0, display:'flex', alignItems:'center', justifyContent:'center', zIndex:100 }}>
@@ -1347,11 +1358,20 @@ function Game108Screen({ room, gs, myHand, socketId, nickname, onPlay, onDraw, o
     }).map(c => c.id));
   }, [isMyTurn, myHand, pending, effSuit, gs]);
 
-  function handleCardClick(c) {
+  const handleCardClick = useCallback((c) => {
     if (!isMyTurn || !playable.has(c.id)) return;
     if (c.rank === 'Q') { setSelected(c); setSuitModal(true); }
     else { SFX.play(); onPlay(c.id, null); }
-  }
+  }, [isMyTurn, playable, onPlay]);
+
+  const handleSuitSelect = useCallback((suit) => {
+    SFX.play();
+    if (selected) {
+      onPlay(selected.id, suit);
+      setSuitModal(false);
+      setSelected(null);
+    }
+  }, [selected, onPlay]);
 
   if (gs?.phase === 'gameOver') {
     const iWon = gs.winner === socketId;
@@ -1399,7 +1419,7 @@ function Game108Screen({ room, gs, myHand, socketId, nickname, onPlay, onDraw, o
               <h3 style={{ fontFamily:'var(--font-d)', fontSize:16, color:'var(--gold)', marginBottom:20 }}>SUIT TANLANG (QUEEN)</h3>
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
                 {['spades','hearts','diamonds','clubs'].map(s => (
-                  <motion.button key={s} onClick={()=>{ SFX.play(); onPlay(selected.id,s); setSuitModal(false); setSelected(null); }}
+                  <motion.button key={s} onClick={() => handleSuitSelect(s)}
                     whileHover={{scale:1.06}} whileTap={{scale:.94}}
                     style={{
                       padding:'16px 20px', borderRadius:10,
@@ -1506,6 +1526,13 @@ function Game108Screen({ room, gs, myHand, socketId, nickname, onPlay, onDraw, o
 }
 
 // ─── MAIN APP ─────────────────────────────────────────────────────
+const SOCKET_EVENTS = [
+  'connect', 'disconnect', 'registered', 'error', 'moveError', 'joinError',
+  'roomCreated', 'roomJoined', 'roomUpdate', 'playerJoined', 'playerLeft',
+  'gameStarted', 'dealCards', 'handUpdate', 'gameState', 'roundOver', 'gameOver',
+  'gameCancelled', 'returnToLobby', 'chatMessage', 'typing', 'reconnected'
+];
+
 export default function App() {
   const [screen,   setScreen]   = useState('login');
   const [nickname, setNickname] = useState('');
@@ -1522,6 +1549,7 @@ export default function App() {
   const sockRef  = useRef(null);
   const tTyping  = useRef({});
   const toastId  = useRef(0);
+  const roomRef  = useRef(null);
 
   const toast = useCallback((msg, type='info') => {
     const id = ++toastId.current;
@@ -1533,122 +1561,172 @@ export default function App() {
     const socket = getSocket();
     sockRef.current = socket;
 
-    socket.on('connect', () => {
+    const onConnect = () => {
       setOnline(true);
       setSocketId(socket.id);
       const saved = localStorage.getItem('karta_nick');
       if (saved) socket.emit('register', {nickname:saved});
-    });
-    socket.on('disconnect', () => {
+    };
+
+    const onDisconnect = () => {
       setOnline(false);
       toast('Ulanish uzildi. Qayta ulanmoqda...', 'error');
-    });
-    socket.on('registered', ({nickname:n}) => { setNickname(n); });
-    socket.on('error', ({msg}) => { toast(msg,'error'); SFX.error(); });
-    socket.on('moveError', ({msg}) => { toast(msg,'error'); SFX.error(); });
-    socket.on('joinError', ({msg}) => { toast(msg,'error'); SFX.error(); });
+    };
 
-    socket.on('roomCreated', ({room:r}) => {
+    const onRegistered = ({nickname:n}) => { setNickname(n); };
+
+    const onError = ({msg}) => { toast(msg,'error'); SFX.error(); };
+    const onMoveError = ({msg}) => { toast(msg,'error'); SFX.error(); };
+    const onJoinError = ({msg}) => { toast(msg,'error'); SFX.error(); };
+
+    const onRoomCreated = ({room:r}) => {
       setRoom(r); setChats(r.chat||[]); setScreen('lobby');
-    });
-    socket.on('roomJoined', ({room:r}) => {
+    };
+    const onRoomJoined = ({room:r}) => {
       setRoom(r); setChats(r.chat||[]); setScreen('lobby');
-    });
-    socket.on('roomUpdate', ({room:r}) => setRoom(r));
-    socket.on('playerJoined', ({nickname:n}) => { toast(`${n} qoʻshildi!`,'success'); SFX.join(); });
-    socket.on('playerLeft', ({nickname:n, room:r}) => {
+    };
+    const onRoomUpdate = ({room:r}) => setRoom(r);
+    const onPlayerJoined = ({nickname:n}) => { toast(`${n} qoʻshildi!`,'success'); SFX.join(); };
+    const onPlayerLeft = ({nickname:n, room:r}) => {
       toast(`${n} chiqdi`,'info');
       if (r) setRoom(r);
-    });
+    };
 
-    socket.on('gameStarted', ({room:r}) => {
+    const onGameStarted = ({room:r}) => {
       setRoom(r); setMyHand([]); setGs(null); SFX.deal();
-    });
-    socket.on('dealCards', ({hand}) => { setMyHand(hand); SFX.deal(); });
-    socket.on('handUpdate', ({hand}) => setMyHand(hand));
+    };
+    const onDealCards = ({hand}) => { setMyHand(hand); SFX.deal(); };
+    const onHandUpdate = ({hand}) => setMyHand(hand);
 
-    socket.on('gameState', (state) => {
+    const onGameState = (state) => {
       setGs(state);
       setScreen(prev => {
         if (prev==='lobby' && state) return roomRef.current?.gameMode || prev;
         return prev;
       });
-    });
+    };
 
-    socket.on('roundOver', (state) => { setGs(state); });
-    socket.on('gameOver', (state) => { setGs(prev => ({...prev,...state,phase:'gameOver'})); });
+    const onRoundOver = (state) => { setGs(state); };
+    const onGameOver = (state) => { setGs(prev => ({...prev,...state,phase:'gameOver'})); };
 
-    socket.on('gameCancelled', ({reason, room:r}) => {
+    const onGameCancelled = ({reason, room:r}) => {
       toast(reason,'error');
       if (r) setRoom(r);
       setGs(null); setMyHand([]);
       setScreen('lobby');
-    });
+    };
 
-    socket.on('returnToLobby', ({room:r}) => {
+    const onReturnToLobby = ({room:r}) => {
       setRoom(r); setGs(null); setMyHand([]); setScreen('lobby');
-    });
+    };
 
-    socket.on('chatMessage', m => setChats(p=>[...p,m]));
-    socket.on('typing', ({nickname:n}) => {
+    const onChatMessage = (m) => setChats(p=>[...p,m]);
+
+    const onTyping = ({nickname:n}) => {
       setTyping(p=>[...new Set([...p,n])]);
       clearTimeout(tTyping.current[n]);
-      tTyping.current[n] = setTimeout(()=>setTyping(p=>p.filter(u=>u!==n)), 2000);
-    });
+      tTyping.current[n] = setTimeout(() => setTyping(p => p.filter(u => u!==n)), 2000);
+    };
 
-    socket.on('reconnected', ({room:r, gameState:gs2}) => {
+    const onReconnected = ({room:r, gameState:gs2}) => {
       setRoom(r);
       if (gs2?.hand) setMyHand(gs2.hand);
       if (gs2?.public) setGs(gs2.public);
       setChats(r.chat||[]);
       setScreen(r.status==='playing'?r.gameMode:'lobby');
       toast('Xonaga qayta ulandi!','success');
-    });
+    };
+
+    socket.on('connect', onConnect);
+    socket.on('disconnect', onDisconnect);
+    socket.on('registered', onRegistered);
+    socket.on('error', onError);
+    socket.on('moveError', onMoveError);
+    socket.on('joinError', onJoinError);
+    socket.on('roomCreated', onRoomCreated);
+    socket.on('roomJoined', onRoomJoined);
+    socket.on('roomUpdate', onRoomUpdate);
+    socket.on('playerJoined', onPlayerJoined);
+    socket.on('playerLeft', onPlayerLeft);
+    socket.on('gameStarted', onGameStarted);
+    socket.on('dealCards', onDealCards);
+    socket.on('handUpdate', onHandUpdate);
+    socket.on('gameState', onGameState);
+    socket.on('roundOver', onRoundOver);
+    socket.on('gameOver', onGameOver);
+    socket.on('gameCancelled', onGameCancelled);
+    socket.on('returnToLobby', onReturnToLobby);
+    socket.on('chatMessage', onChatMessage);
+    socket.on('typing', onTyping);
+    socket.on('reconnected', onReconnected);
 
     socket.connect();
-    return () => {
-      ['connect','disconnect','registered','error','moveError','joinError',
-       'roomCreated','roomJoined','roomUpdate','playerJoined','playerLeft',
-       'gameStarted','dealCards','handUpdate','gameState','roundOver','gameOver',
-       'gameCancelled','returnToLobby','chatMessage','typing','reconnected'
-      ].forEach(ev => socket.off(ev));
-    };
-  }, []);
 
-  const roomRef = useRef(null);
+    return () => {
+      SOCKET_EVENTS.forEach(ev => socket.off(ev));
+      Object.values(tTyping.current).forEach(t => clearTimeout(t));
+    };
+  }, [toast]);
+
   useEffect(() => { roomRef.current = room; }, [room]);
+  
   useEffect(() => {
     if (gs && room && screen==='lobby') setScreen(room.gameMode);
-  }, [gs]);
+  }, [gs, room, screen]);
 
-  function login(n) {
+  const login = useCallback((n) => {
     setNickname(n);
     sockRef.current.emit('register', {nickname:n});
     setScreen('menu');
-  }
-  function logout() {
+  }, []);
+
+  const logout = useCallback(() => {
     localStorage.removeItem('karta_nick');
     setNickname(''); setRoom(null); setGs(null); setMyHand([]);
     setScreen('login');
-  }
-  function createRoom({gameMode,gameType,deckCount}) {
+  }, []);
+
+  const createRoom = useCallback(({gameMode,gameType,deckCount}) => {
     sockRef.current.emit('createRoom',{gameMode,gameType,deckCount});
-  }
-  function joinRoom(roomId) {
+  }, []);
+
+  const joinRoom = useCallback((roomId) => {
     sockRef.current.emit('joinRoom',{roomId:roomId.trim()});
-  }
-  function leave() {
+  }, []);
+
+  const leave = useCallback(() => {
     if (room?.id) sockRef.current.emit('leaveRoom',{roomId:room.id});
     setRoom(null); setGs(null); setMyHand([]); setChats([]);
     setScreen('menu');
-  }
-  function sendChat(text) { sockRef.current.emit('chatMessage',{roomId:room?.id,text}); }
-  function buraPlay(cardId) { sockRef.current.emit('buraPlayCard',{roomId:room?.id,cardId}); }
-  function buraThrow() { sockRef.current.emit('buraThrow',{roomId:room?.id}); }
-  function play108(cardId, suit) { sockRef.current.emit('108PlayCard',{roomId:room?.id,cardId,chosenSuit:suit}); }
-  function draw108() { sockRef.current.emit('108DrawCard',{roomId:room?.id}); }
-  function playAgain() { sockRef.current.emit('playAgain',{roomId:room?.id}); }
-  function nextRound() { sockRef.current.emit('playAgain',{roomId:room?.id}); }
+  }, [room]);
+
+  const sendChat = useCallback((text) => {
+    sockRef.current.emit('chatMessage',{roomId:room?.id,text});
+  }, [room]);
+
+  const buraPlay = useCallback((cardId) => {
+    sockRef.current.emit('buraPlayCard',{roomId:room?.id,cardId});
+  }, [room]);
+
+  const buraThrow = useCallback(() => {
+    sockRef.current.emit('buraThrow',{roomId:room?.id});
+  }, [room]);
+
+  const play108 = useCallback((cardId, suit) => {
+    sockRef.current.emit('108PlayCard',{roomId:room?.id,cardId,chosenSuit:suit});
+  }, [room]);
+
+  const draw108 = useCallback(() => {
+    sockRef.current.emit('108DrawCard',{roomId:room?.id});
+  }, [room]);
+
+  const playAgain = useCallback(() => {
+    sockRef.current.emit('playAgain',{roomId:room?.id});
+  }, [room]);
+
+  const nextRound = useCallback(() => {
+    sockRef.current.emit('playAgain',{roomId:room?.id});
+  }, [room]);
 
   return (
     <div style={{ width:'100%', height:'100%', position:'fixed', inset:0, overflow:'hidden' }}>
